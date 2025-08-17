@@ -1,0 +1,22 @@
+# categories.py
+CATEGORIES = {
+    'Electronics': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18018102031%2Cp_98%3A21909049031&dc&page={}&language=en",
+    #'Arts & Crafts':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18017807031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3ADDbthibJ%2F7VR3MFSon0GGJTwJp3NJDSDpT3qrACKCeM",
+    'Automotive': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18017874031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AuVAlxYp0w%2FGP5de6c5UF8hw8IiZZrmRb49dxAfZoC2w",
+    #'Baby Products':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18017931031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AaRp8qqFE%2FIp9oTn7YkBgIR5OpOUun9URz2UPlXOK9lY",
+    'Beauty': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18017988031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AE4gIB0I7SlsgnwKQU7YCYz1uzeJj0oP6WnfXJTsR9tE",
+    #'Everything':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18029449031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AoxxMDxHvnVlHIExPxZlthnNNH2E3B9SqtOYVPOCR5EU",
+    'Fashion': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18018165031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3ALjXQvgUsynoO32Abn%2FWthSGsPncB3XREPCbk04H%2BDQ4",
+    #'Garden':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18019023031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3A86%2FR3jnXNZVGec6fMZ80xfRCMfTiMZIxYDRogcnEE6w",
+    'Grocery':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18020637031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AW0MqCz1YxNyCsQmG9xLUfI9rqjnrgT71yjmrjfxBxHw",
+    'Health & Household Products':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18021875031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AVC%2Fb%2Boac6LNenboYHZIbTvurYqBQw8gsWeaB71CHQIY",
+    'Home & Kitchen': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18021933031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3A6OfJCZN6OeWxfl1G0LOSIhOFysiUUKXYCJlBDdEyPdo",
+    #'Industrial & Scientific': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18022047031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3Aejkcp1HSdSxQLhQce3afMhMBhV3i3%2FLxdkSS0rN4Ces",
+   # 'Musical Instruments': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18022218031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AbX6zC4IxUULuoTNGqfPptGOSbIxD3qUjntfvMay6%2BaQ",
+    #'Office Products': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18022275031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AVle0HTenzf7IYQdXYTdiTsQrWA%2BthkoyrNSweYSemec",
+    #'Pet Supplies': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18022332031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AUXq3VR5JgNUSd4cs7gBkPIajZcSeo8vxyvh8gbzYlyI",
+    #'Sports & Outdoors':  "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18022446031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3AeDXLIxIRoiH9AmlgSs%2BSrNIWzEgb4aNJ6gGyLb6xurI",
+    'Tools & Home Improvement': "https://www.amazon.eg/s?me=A1ZVRGNO5AYLOV&rh=n%3A18021990031%2Cp_98%3A21909049031&dc&page={}&language=en&ds=v1%3ASOS%2FR2E3DAwtG%2B5ubHoKb32F6WTrtsc%2BFvOeyFkrhFk",
+   # '7ELAL': "https://www.amazon.eg/s?k=%D8%AD%D9%84%D9%84&i=home&rh=n%3A21863794031%2Cp_98%3A21909049031&dc&language=en&ds=v1%3AyZ5bHtpgJmN3CsuhF7zV5%2Bl1J9a0vlSRjfKaYB63USg&qid=1750680819&rnid=21909048031&ref=sr_nr_p_98_1",
+    #'ATATEN WE MLYAT': "https://www.amazon.eg/s?rh=n%3A21863793031%2Cp_98%3A21909049031&dc&language=en_AE&qid=1750682784&rnid=21909048031&ref=sr_nr_p_98_0",
+}
