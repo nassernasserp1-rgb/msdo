@@ -1,0 +1,10 @@
+# LAQTA AI System Requirements
+customtkinter>=5.2.0
+requests>=2.31.0
+playwright>=1.40.0
+Pillow>=10.0.0
+asyncio-throttle>=1.0.2
+
+# Installation:
+# pip install -r requirements.txt
+# playwright install chromium

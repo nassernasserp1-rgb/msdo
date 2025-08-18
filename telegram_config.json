@@ -1,0 +1,12 @@
+{
+    "bot_token": "YOUR_BOT_TOKEN_HERE",
+    "users": [
+        "YOUR_CHAT_ID_HERE"
+    ],
+    "instructions": {
+        "step1": "Create bot via @BotFather on Telegram",
+        "step2": "Get bot token and put it in bot_token",
+        "step3": "Get your chat ID and put it in users array",
+        "step4": "You can add multiple user IDs in the array"
+    }
+}
