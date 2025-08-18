@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-LAQTA - النظام النهائي مع الاستخراج المتقدم من جوجل
+LAQTA - النظام النهائي مع الاستخراج المتقدم من جوجل (مصحح)
 المشروع الكامل الاحترافي مع جميع المميزات
 """
 
@@ -46,9 +46,9 @@ alerts_data = []
 notified_asins = set()
 existing_asins = set()
 
-# نظام الاستخراج المتقدم من جوجل
+# نظام الاستخراج المتقدم من جوجل (مصحح)
 class AdvancedGoogleExtractor:
-    """مستخرج متقدم للبيانات من صفحة جوجل - الطريقة الاحترافية"""
+    """مستخرج متقدم للبيانات من صفحة جوجل - نسخة مصححة"""
     
     def __init__(self):
         self.stats = {
@@ -63,7 +63,7 @@ class AdvancedGoogleExtractor:
         }
         self.cache = {}
         
-        # المواقع المصرية المعروفة مع أسمائها
+        # المواقع المصرية المعروفة
         self.egyptian_sites_map = {
             'amazon.eg': 'أمازون مصر',
             'noon.com': 'نون',
@@ -77,8 +77,7 @@ class AdvancedGoogleExtractor:
             'spinneys.com': 'سبينيز',
             'tradeline.com.eg': 'تريد لاين',
             'kanbkam.com': 'كانبكام',
-            'aliexpress.com': 'علي اكسبرس',
-            'metro-online.com': 'مترو'
+            'aliexpress.com': 'علي اكسبرس'
         }
     
     def optimize_search_term(self, product_name: str) -> str:
@@ -87,7 +86,7 @@ class AdvancedGoogleExtractor:
         # استخراج العلامة التجارية
         brands = {
             'samsung': 'سامسونج',
-            'apple': 'ابل',
+            'apple': 'ابل', 
             'iphone': 'ايفون',
             'xiaomi': 'شاومي',
             'sony': 'سوني',
@@ -97,7 +96,8 @@ class AdvancedGoogleExtractor:
             'vaseline': 'فازلين',
             'nivea': 'نيفيا',
             'axe': 'اكس',
-            'dove': 'دوف'
+            'dove': 'دوف',
+            'care': 'كير'
         }
         
         name_lower = product_name.lower()
@@ -109,7 +109,7 @@ class AdvancedGoogleExtractor:
                 brand_found = brand_ar
                 break
         
-        # استخراج أرقام مهمة (موديل، حجم، ذاكرة)
+        # استخراج أرقام مهمة
         important_numbers = re.findall(r'\b(\d+(?:gb|ml|mm|w|mah)?)\b', name_lower)
         
         # استخراج كلمات مهمة
@@ -122,7 +122,7 @@ class AdvancedGoogleExtractor:
             if len(important_words) >= 4:
                 break
         
-        # بناء مصطلح البحث الأمثل
+        # بناء مصطلح البحث
         search_parts = []
         
         if brand_found:
@@ -136,12 +136,10 @@ class AdvancedGoogleExtractor:
         elif important_words:
             search_parts.extend(important_words[:2])
         
-        # إضافة "سعر مصر" للحصول على نتائج مصرية
         search_term = ' '.join(search_parts) + " سعر مصر"
-        
         return search_term.strip()
     
-    async def extract_google_shopping_results(self, product_name: str, amazon_price: float) -> Dict:
+    async def extract_google_shopping_results(self, product_name: str, amazon_price: float) -> dict:
         """استخراج متقدم من نتائج جوجل للتسوق"""
         
         search_term = self.optimize_search_term(product_name)
@@ -180,7 +178,7 @@ class AdvancedGoogleExtractor:
                         '--disable-dev-shm-usage',
                         '--disable-images',
                         '--window-size=1920,1080',
-                        '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                        '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                     ]
                 )
                 
@@ -201,14 +199,14 @@ class AdvancedGoogleExtractor:
                         print(f"   📡 استراتيجية {strategy_idx + 1}: البحث في جوجل...")
                         
                         await page.goto(google_url, timeout=15000)
-                        await page.wait_for_timeout(4000)  # انتظار تحميل النتائج
+                        await page.wait_for_timeout(4000)
                         
                         # استخراج البيانات المهيكلة
                         extracted_data = await page.evaluate("""
                             () => {
                                 const products = [];
                                 
-                                // المواقع المصرية للبحث عنها
+                                // المواقع المصرية
                                 const egyptianSites = [
                                     'amazon.eg', 'noon.com', 'jumia.com.eg', 'jumia.com',
                                     'carrefouregypt.com', 'carrefour.eg', 'souq.com', 
@@ -216,7 +214,7 @@ class AdvancedGoogleExtractor:
                                     'tradeline.com.eg', 'kanbkam.com', 'aliexpress.com'
                                 ];
                                 
-                                // أنماط الأسعار المتقدمة
+                                // أنماط الأسعار
                                 const pricePatterns = [
                                     /‏?([0-9,]+(?:\\.[0-9]+)?)\\s*جنيه/g,
                                     /السعر الحالي هو[.\\s]*‏?([0-9,]+(?:\\.[0-9]+)?)\\s*جنيه/g,
@@ -224,30 +222,23 @@ class AdvancedGoogleExtractor:
                                     /([0-9,]+(?:\\.[0-9]+)?)\\s*(?:ج\\.م\\.|جم|LE)/g
                                 ];
                                 
-                                // البحث في أنواع مختلفة من العناصر
+                                // أنواع العناصر
                                 const resultSelectors = [
-                                    '.g',                    // النتائج العادية
-                                    '.yuRUbf',              // النتائج الحديثة
-                                    '.tF2Cxc',              // نتائج البحث المهيكلة
-                                    '.MjjYud',              // نتائج جديدة
-                                    '.commercial-unit',      // النتائج التجارية
-                                    '.pla-unit',            // وحدات المنتجات
-                                    '.shopping-carousel-item', // عناصر التسوق
-                                    '.sh-dgr__content',     // نتائج جوجل شوبينج
-                                    '.PLla-d'               // نتائج المنتجات
+                                    '.g', '.yuRUbf', '.tF2Cxc', '.MjjYud',
+                                    '.commercial-unit', '.pla-unit', '.shopping-carousel-item',
+                                    '.sh-dgr__content', '.PLla-d'
                                 ];
                                 
                                 for (const selector of resultSelectors) {
                                     const elements = document.querySelectorAll(selector);
                                     
                                     elements.forEach((element, index) => {
-                                        if (index >= 20) return; // أول 20 نتيجة
+                                        if (index >= 20) return;
                                         
                                         try {
                                             const elementText = element.textContent || '';
                                             const elementHTML = element.innerHTML || '';
                                             
-                                            // تجاهل النتائج القصيرة جداً
                                             if (elementText.length < 50) return;
                                             
                                             // استخراج الأسعار
@@ -266,7 +257,6 @@ class AdvancedGoogleExtractor:
                                             const foundSites = new Set();
                                             const foundLinks = new Set();
                                             
-                                            // البحث في النص
                                             for (const site of egyptianSites) {
                                                 if (elementText.includes(site) || elementHTML.includes(site)) {
                                                     foundSites.add(site);
@@ -285,8 +275,8 @@ class AdvancedGoogleExtractor:
                                                 }
                                             });
                                             
-                                            // استخراج العنوان/الوصف
-                                            const titleSelectors = ['h3', 'h2', '.LC20lb', '.DKV0Md', '.yuRUbf h3'];
+                                            // استخراج العنوان
+                                            const titleSelectors = ['h3', 'h2', '.LC20lb', '.DKV0Md'];
                                             let title = '';
                                             for (const titleSel of titleSelectors) {
                                                 const titleEl = element.querySelector(titleSel);
@@ -304,17 +294,15 @@ class AdvancedGoogleExtractor:
                                                     links: Array.from(foundLinks),
                                                     title: title || 'بدون عنوان',
                                                     description: elementText.slice(0, 150),
-                                                    selector_used: selector,
-                                                    element_index: index
+                                                    selector_used: selector
                                                 });
                                             }
                                             
                                         } catch (e) {
-                                            // تجاهل الأخطاء والمتابعة
+                                            // تجاهل الأخطاء
                                         }
                                     });
                                     
-                                    // إذا وجدنا منتجات كافية، نتوقف
                                     if (products.length >= 8) break;
                                 }
                                 
@@ -328,7 +316,7 @@ class AdvancedGoogleExtractor:
                             
                             print(f"      ✅ استخراج ناجح: {len(extracted_data)} منتجات")
                             extraction_successful = True
-                            break
+                            break  # نجح الاستخراج، نتوقف
                         else:
                             print(f"      ⚪ لا توجد منتجات مستخرجة")
                     
@@ -404,11 +392,11 @@ class AdvancedGoogleExtractor:
                         result['extraction_details']['sites_found'] = len(unique_sites)
                         result['extraction_details']['prices_found'] = len(unique_prices)
                         
-                        # حساب نقاط الثقة المتقدمة
-                        confidence_score = 40  # نقطة البداية
+                        # حساب نقاط الثقة
+                        confidence_score = 40
                         confidence_reasons = []
                         
-                        # عامل الترتيب (40 نقطة كحد أقصى)
+                        # عامل الترتيب
                         if amazon_rank == 1:
                             rank_points = 35
                             confidence_reasons.append(f"الأرخص في السوق ({total_competitors} منافس)")
@@ -427,7 +415,7 @@ class AdvancedGoogleExtractor:
                         
                         confidence_score += rank_points
                         
-                        # عامل المتوسط (25 نقطة كحد أقصى)
+                        # عامل المتوسط
                         if vs_avg_diff > 20:
                             avg_points = 25
                             confidence_reasons.append(f"أرخص بـ {vs_avg_diff:.0f}% من المتوسط")
@@ -446,61 +434,50 @@ class AdvancedGoogleExtractor:
                         
                         confidence_score += avg_points
                         
-                        # عامل عدد المواقع (20 نقطة كحد أقصى)
+                        # عامل عدد المواقع
                         sites_count = len(unique_sites)
                         if sites_count >= 5:
                             sites_points = 20
-                            confidence_reasons.append(f"مقارنة شاملة مع {sites_count} مواقع")
                         elif sites_count >= 4:
                             sites_points = 15
-                            confidence_reasons.append(f"مقارنة جيدة مع {sites_count} مواقع")
                         elif sites_count >= 3:
                             sites_points = 10
-                            confidence_reasons.append(f"مقارنة مع {sites_count} مواقع")
                         elif sites_count >= 2:
                             sites_points = 5
-                            confidence_reasons.append(f"مقارنة محدودة مع {sites_count} مواقع")
                         else:
                             sites_points = 0
-                            confidence_reasons.append(f"موقع واحد فقط")
                         
                         confidence_score += sites_points
                         
-                        # عامل جودة الاستخراج (15 نقطة كحد أقصى)
+                        # عامل جودة الاستخراج
                         products_count = len(result['extracted_products'])
                         if products_count >= 5:
                             extraction_points = 15
-                            confidence_reasons.append(f"استخراج ممتاز ({products_count} منتجات)")
                         elif products_count >= 3:
                             extraction_points = 10
-                            confidence_reasons.append(f"استخراج جيد ({products_count} منتجات)")
                         else:
                             extraction_points = 5
-                            confidence_reasons.append(f"استخراج أساسي ({products_count} منتجات)")
                         
                         confidence_score += extraction_points
                         
                         # تحديد النقاط النهائية
                         result['confidence_score'] = max(0, min(100, confidence_score))
                         
-                        # تحديد التوصية النهائية
+                        # تحديد التوصية
                         if result['confidence_score'] >= 85:
                             result['is_good_deal'] = True
                             result['recommendation'] = f"🔥 عرض ممتاز! {confidence_reasons[0]}"
-                            
                         elif result['confidence_score'] >= 70:
                             result['is_good_deal'] = True
                             result['recommendation'] = f"✅ عرض جيد! {confidence_reasons[0]}"
-                            
                         elif result['confidence_score'] >= 55:
                             result['is_good_deal'] = True
                             result['recommendation'] = f"⚠️ عرض مقبول! {confidence_reasons[0]}"
-                            
                         else:
                             result['is_good_deal'] = False
                             result['recommendation'] = f"❌ عرض ضعيف! {confidence_reasons[0]}"
                         
-                        # طباعة التحليل المفصل
+                        # طباعة التحليل
                         print(f"   📊 تحليل السوق المتقدم:")
                         print(f"      💰 متوسط السوق: {avg_market_price:,.0f} EGP")
                         print(f"      📉 أقل سعر: {min_market_price:,.0f} EGP")
@@ -525,13 +502,6 @@ class AdvancedGoogleExtractor:
                         self.stats['successful_extractions'] += 1
                         self.stats['products_found'] += len(result['extracted_products'])
                         self.stats['sites_detected'] += len(unique_sites)
-                        
-                        extraction_successful = True  # نجح الاستخراج
-                        break  # نجح الاستخراج، نتوقف عن تجربة استراتيجيات أخرى
-                    
-                    except Exception as e:
-                        print(f"      ❌ خطأ في الاستراتيجية {strategy_idx + 1}: {e}")
-                        continue
                 
                 # حفظ في الكاش
                 if extraction_successful:
@@ -545,26 +515,6 @@ class AdvancedGoogleExtractor:
             self.stats['total_searches'] += 1
         
         return result
-    
-    def get_detailed_stats(self) -> Dict:
-        """الحصول على إحصائيات مفصلة للاستخراج"""
-        total = self.stats['total_searches']
-        
-        return {
-            'total_searches': total,
-            'successful_extractions': self.stats['successful_extractions'],
-            'success_rate': (self.stats['successful_extractions'] / max(total, 1)) * 100,
-            'products_found': self.stats['products_found'],
-            'sites_detected': self.stats['sites_detected'],
-            'validated_deals': self.stats['validated_deals'],
-            'rejected_deals': self.stats['rejected_deals'],
-            'avg_products_per_search': self.stats['products_found'] / max(total, 1),
-            'avg_sites_per_search': self.stats['sites_detected'] / max(total, 1),
-            'validation_rate': (self.stats['validated_deals'] / max(total, 1)) * 100,
-            'extraction_errors': self.stats['extraction_errors'],
-            'cache_size': len(self.cache),
-            'cache_hits': self.stats['cache_hits']
-        }
 
 # إنشاء مستخرج جوجل المتقدم
 advanced_extractor = AdvancedGoogleExtractor()
@@ -654,7 +604,7 @@ def send_actual_telegram_alert(item, old_price, new_price, discount_percent, dro
 
         price_row = f"💰 {price_strike} → {price_now}" if price_strike else f"💰 {price_now}"
         
-        # معلومات السوق المتقدمة
+        # معلومات السوق
         market_info = ""
         if market_data:
             avg_price = market_data.get('avg_price', 0)
@@ -698,7 +648,7 @@ def send_actual_telegram_alert(item, old_price, new_price, discount_percent, dro
 🔍 <b>Google Advanced Extraction System</b>
 """
 
-        # أزرار ذكية مع البحث المحسن
+        # أزرار ذكية
         search_term = extraction_details.get('search_term', product_name)
         clean_search = search_term.replace(' سعر مصر', '').replace(' ', '+').replace('&', 'and')
         
@@ -814,7 +764,7 @@ def parse_egp_price(text):
     m = re.search(r'(\d[\d,\.]*)', text.replace(",", ""))
     return float(m.group(1)) if m else None
 
-# دالة السكرابة المحسنة
+# دالة السكرابة
 async def scrape_single_page(section, section_url, page_num, db, log_fn=None, discount_alert_cb=None, discount_threshold=25):
     """سكرابة صفحة واحدة مع الاستخراج المتقدم"""
     
@@ -1007,7 +957,7 @@ def show_stats():
     
     # إحصائيات الاستخراج المتقدم
     if advanced_google_enabled[0]:
-        stats = advanced_extractor.get_detailed_stats()
+        stats = advanced_extractor.stats
         log(f"🔍 Advanced Google Stats:")
         log(f"   📊 Total Searches: {stats['total_searches']}")
         log(f"   ✅ Successful Extractions: {stats['successful_extractions']}")
@@ -1017,10 +967,17 @@ def show_stats():
         log(f"   ❌ Extraction Errors: {stats['extraction_errors']}")
         log(f"   📱 Products Found: {stats['products_found']}")
         log(f"   🌐 Sites Detected: {stats['sites_detected']}")
-        log(f"   📈 Success Rate: {stats['success_rate']:.1f}%")
-        log(f"   📈 Validation Rate: {stats['validation_rate']:.1f}%")
-        log(f"   📊 Avg Products/Search: {stats['avg_products_per_search']:.1f}")
-        log(f"   🏪 Avg Sites/Search: {stats['avg_sites_per_search']:.1f}")
+        
+        if stats['total_searches'] > 0:
+            success_rate = (stats['successful_extractions'] / stats['total_searches']) * 100
+            validation_rate = (stats['validated_deals'] / stats['total_searches']) * 100
+            avg_products = stats['products_found'] / stats['total_searches']
+            avg_sites = stats['sites_detected'] / stats['total_searches']
+            
+            log(f"   📈 Success Rate: {success_rate:.1f}%")
+            log(f"   📈 Validation Rate: {validation_rate:.1f}%")
+            log(f"   📊 Avg Products/Search: {avg_products:.1f}")
+            log(f"   🏪 Avg Sites/Search: {avg_sites:.1f}")
 
 def toggle_advanced_google():
     advanced_google_enabled[0] = advanced_google_chk.get()
