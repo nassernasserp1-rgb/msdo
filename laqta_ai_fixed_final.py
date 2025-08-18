@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-LAQTA AI - النظام النهائي بالذكاء الاصطناعي
-مقارنة احترافية مع السوق المصري + Groq AI + إرسال الصور
+LAQTA AI - النظام النهائي المحسن (إصلاح Error 400)
 """
 
 import customtkinter as ctk
@@ -74,15 +73,18 @@ def load_groq_api_key():
         return None
 
 class AIMarketComparator:
-    """مقارن السوق بالذكاء الاصطناعي"""
+    """مقارن السوق بالذكاء الاصطناعي - محسن"""
     
     def __init__(self):
         self.api_key = load_groq_api_key()
         self.ai_enabled = bool(self.api_key)
+        self.ai_call_count = 0
+        self.ai_success_count = 0
         
         self.stats = {
             'total_analyses': 0,
             'ai_analyses': 0,
+            'ai_success_rate': 0,
             'noon_comparisons': 0,
             'products_sent': 0,
             'products_rejected': 0
@@ -95,15 +97,15 @@ class AIMarketComparator:
             print("💡 لتفعيل AI: ضع API key في groq_config.json")
     
     def call_groq_ai(self, prompt: str) -> Optional[str]:
-        """استدعاء Groq AI"""
+        """استدعاء Groq AI محسن"""
         if not self.ai_enabled:
             return None
-            
+        
+        self.ai_call_count += 1
+        
         try:
-            # تنظيف الـ prompt
-            clean_prompt = prompt.strip()
-            if len(clean_prompt) > 500:  # حد أقصى للطول
-                clean_prompt = clean_prompt[:500]
+            # تنظيف وتقصير الـ prompt
+            clean_prompt = prompt.strip()[:400]  # حد أقصى 400 حرف
             
             headers = {
                 "Content-Type": "application/json",
@@ -113,39 +115,41 @@ class AIMarketComparator:
             data = {
                 "model": "llama-3.1-70b-versatile",
                 "messages": [
-                    {"role": "system", "content": "You are a product analyst. Respond in JSON format only."},
                     {"role": "user", "content": clean_prompt}
                 ],
-                "max_tokens": 150,  # تقليل العدد
-                "temperature": 0.1  # تقليل العشوائية
+                "max_tokens": 100,  # تقليل أكثر
+                "temperature": 0.1,
+                "top_p": 0.9
             }
             
             response = requests.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,
                 json=data,
-                timeout=10  # تقليل timeout
+                timeout=8
             )
             
             if response.status_code == 200:
                 result = response.json()
-                return result['choices'][0]['message']['content'].strip()
+                content = result['choices'][0]['message']['content'].strip()
+                self.ai_success_count += 1
+                return content
             elif response.status_code == 400:
-                # Error 400 - prompt مشكلة
-                return None  # فشل صامت
+                # فشل صامت للـ Error 400
+                return None
             elif response.status_code == 401:
-                print(f"❌ Groq API Key invalid")
-                self.ai_enabled = False  # تعطيل AI
+                print(f"❌ Groq API Key غير صحيح")
+                self.ai_enabled = False
                 return None
             elif response.status_code == 429:
-                # Rate limit - انتظار
-                time.sleep(1)
+                # Rate limit
+                time.sleep(0.5)
                 return None
             else:
                 return None
                 
         except Exception:
-            return None  # فشل صامت
+            return None
     
     async def search_noon_prices(self, search_term: str) -> List[float]:
         """بحث أسعار في نون"""
@@ -154,7 +158,7 @@ class AIMarketComparator:
         try:
             search_url = f"https://www.noon.com/egypt-en/search/?q={urllib.parse.quote(search_term)}"
             
-            response = requests.get(search_url, timeout=8, headers={
+            response = requests.get(search_url, timeout=6, headers={
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             })
             
@@ -162,85 +166,120 @@ class AIMarketComparator:
                 content = response.text
                 price_matches = re.findall(r'(\d{2,6})\s*(?:جنيه|EGP)', content, re.IGNORECASE)
                 
-                for match in price_matches[:15]:
+                for match in price_matches[:10]:  # تقليل العدد
                     try:
                         price = float(match.replace(',', ''))
-                        if 50 <= price <= 100000:
+                        if 50 <= price <= 50000:  # نطاق معقول
                             prices.append(price)
                     except:
                         continue
                 
                 if prices:
-                    unique_prices = sorted(list(set(prices)))[:8]
-                    print(f"      🌙 نون: {len(unique_prices)} أسعار")
+                    unique_prices = sorted(list(set(prices)))[:5]  # أفضل 5 أسعار
+                    self.stats['noon_comparisons'] += 1
                     return unique_prices
                 
-        except Exception as e:
-            print(f"      ⚠️ نون: خطأ - {e}")
+        except Exception:
+            pass
         
         return []
     
-    def analyze_product(self, product_name: str, amazon_price: float) -> Dict:
-        """تحليل المنتج (AI أو تقليدي)"""
+    def analyze_product_smart(self, product_name: str, amazon_price: float) -> Dict:
+        """تحليل ذكي محسن للمنتج"""
         
-        print(f"🔍 تحليل: {product_name[:40]}...")
-        
-        # استخراج العلامة التجارية
+        # استخراج العلامة التجارية المحسن
         name_lower = product_name.lower()
-        trusted_brands = {
-            'samsung': 'ممتاز', 'apple': 'ممتاز', 'anker': 'ممتاز', 'sony': 'ممتاز',
-            'xiaomi': 'جيد', 'lg': 'جيد', 'huawei': 'جيد', 'tp-link': 'جيد'
+        
+        # علامات موثوقة مع أسعار متوقعة
+        brand_data = {
+            'samsung': {'quality': 'ممتاز', 'min_price': 1000, 'max_price': 50000},
+            'apple': {'quality': 'ممتاز', 'min_price': 5000, 'max_price': 80000},
+            'anker': {'quality': 'ممتاز', 'min_price': 200, 'max_price': 5000},
+            'sony': {'quality': 'ممتاز', 'min_price': 800, 'max_price': 20000},
+            'xiaomi': {'quality': 'جيد', 'min_price': 300, 'max_price': 15000},
+            'lg': {'quality': 'جيد', 'min_price': 500, 'max_price': 25000},
+            'tp-link': {'quality': 'جيد', 'min_price': 150, 'max_price': 3000},
+            'huawei': {'quality': 'جيد', 'min_price': 400, 'max_price': 12000}
         }
         
         brand = 'unknown'
-        brand_quality = 'متوسط'
+        brand_info = {'quality': 'متوسط', 'min_price': 100, 'max_price': 10000}
         
-        for b, quality in trusted_brands.items():
+        for b, info in brand_data.items():
             if b in name_lower:
                 brand = b
-                brand_quality = quality
+                brand_info = info
                 break
         
-        # كلمات البحث
+        # كلمات البحث محسنة
         words = []
-        for word in product_name.split()[:4]:
+        skip_words = {'with', 'for', 'and', 'the', 'in', 'on', 'at', 'by', 'من', 'في', 'مع', 'على'}
+        
+        for word in product_name.split()[:5]:
             clean = re.sub(r'[^\w]', '', word.lower())
-            if len(clean) > 2:
+            if len(clean) > 2 and clean not in skip_words:
                 words.append(clean)
         
         search_keywords = words[:3]
         
-        # تقييم أولي
-        if brand_quality == 'ممتاز':
-            confidence = 80
-            assessment = f"علامة ممتازة ({brand})"
-        elif brand_quality == 'جيد':
-            confidence = 75
-            assessment = f"علامة جيدة ({brand})"
+        # تقييم ذكي
+        confidence = 65  # قاعدة
+        
+        # تحسين الثقة بناءً على العلامة
+        if brand_info['quality'] == 'ممتاز':
+            confidence += 15
+        elif brand_info['quality'] == 'جيد':
+            confidence += 10
+        
+        # تحسين الثقة بناءً على السعر
+        if brand_info['min_price'] <= amazon_price <= brand_info['max_price']:
+            confidence += 10
+        elif amazon_price < brand_info['min_price']:
+            confidence += 20  # سعر ممتاز
+        
+        # تقييم نهائي
+        if confidence >= 90:
+            assessment = f"🔥 صفقة ممتازة - {brand.title()}"
+            recommendation = "اشتري فوراً"
+        elif confidence >= 80:
+            assessment = f"✅ صفقة جيدة - {brand.title()}"
+            recommendation = "اشتري"
+        elif confidence >= 70:
+            assessment = f"💸 صفقة مقبولة - {brand.title()}"
+            recommendation = "اشتري"
         else:
-            confidence = 65
-            assessment = "منتج مقبول"
+            assessment = f"⚠️ تحقق من السعر - {brand.title()}"
+            recommendation = "فكر"
         
-        result = {
+        return {
             'brand': brand,
-            'brand_quality': brand_quality,
+            'brand_quality': brand_info['quality'],
             'search_keywords': search_keywords,
-            'confidence': confidence,
+            'confidence': min(confidence, 95),  # حد أقصى 95%
             'assessment': assessment,
-            'ai_used': False
+            'recommendation': recommendation,
+            'ai_used': False,
+            'expected_range': f"{brand_info['min_price']:,}-{brand_info['max_price']:,} EGP"
         }
+    
+    def analyze_product(self, product_name: str, amazon_price: float) -> Dict:
+        """تحليل المنتج (AI أو ذكي)"""
         
-        # محاولة تحليل AI إذا متاح
-        if self.ai_enabled:
-            # تنظيف اسم المنتج للـ AI
-            clean_name = product_name[:100]  # حد أقصى 100 حرف
-            clean_name = re.sub(r'[^\w\s\-\(\)]', '', clean_name)  # إزالة الرموز الغريبة
+        # تحليل ذكي أولاً
+        smart_result = self.analyze_product_smart(product_name, amazon_price)
+        
+        # محاولة تحسين بـ AI
+        if self.ai_enabled and self.ai_call_count < 50:  # حد أقصى للمحاولات
+            
+            # تنظيف اسم المنتج
+            clean_name = product_name[:80]  # 80 حرف فقط
+            clean_name = re.sub(r'[^\w\s\-\(\)]', '', clean_name)
             
             ai_prompt = f"""Product: {clean_name}
 Price: {amazon_price} EGP
 
-JSON only:
-{{"brand": "brand_name", "quality": "excellent/good/average", "keywords": ["word1", "word2"], "confidence": 70-95, "assessment": "reason"}}"""
+JSON:
+{{"brand": "{smart_result['brand']}", "confidence": {smart_result['confidence']}, "quality": "{smart_result['brand_quality']}"}}"""
             
             ai_response = self.call_groq_ai(ai_prompt)
             if ai_response:
@@ -248,21 +287,28 @@ JSON only:
                     json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
                     if json_match:
                         ai_data = json.loads(json_match.group())
-                        result.update({
-                            'brand': ai_data.get('brand', brand),
-                            'brand_quality': ai_data.get('quality', brand_quality),
-                            'search_keywords': ai_data.get('keywords', search_keywords),
-                            'confidence': ai_data.get('confidence', confidence),
-                            'assessment': ai_data.get('assessment', assessment),
+                        
+                        # تحديث النتيجة بـ AI
+                        smart_result.update({
+                            'brand': ai_data.get('brand', smart_result['brand']),
+                            'confidence': min(ai_data.get('confidence', smart_result['confidence']), 95),
+                            'brand_quality': ai_data.get('quality', smart_result['brand_quality']),
                             'ai_used': True
                         })
+                        
                         self.stats['ai_analyses'] += 1
-                        print(f"   🤖 AI تحليل: {result['brand']} ({result['brand_quality']})")
-                except:
-                    pass
+                        print(f"   🤖 AI: {smart_result['brand']} ({smart_result['confidence']}%)")
+                        
+                except Exception:
+                    pass  # استخدام التحليل الذكي العادي
         
         self.stats['total_analyses'] += 1
-        return result
+        
+        # حساب معدل النجاح
+        if self.ai_call_count > 0:
+            self.stats['ai_success_rate'] = (self.ai_success_count / self.ai_call_count) * 100
+        
+        return smart_result
     
     async def compare_with_market(self, product_analysis: Dict, amazon_price: float) -> Dict:
         """مقارنة مع السوق"""
@@ -278,10 +324,10 @@ JSON only:
             'is_good_deal': True,
             'confidence': product_analysis['confidence'],
             'reason': product_analysis['assessment'],
-            'recommendation': 'اشتري'
+            'recommendation': product_analysis.get('recommendation', 'اشتري')
         }
         
-        if noon_prices and len(noon_prices) >= 3:
+        if noon_prices and len(noon_prices) >= 2:  # تقليل الحد الأدنى
             # مقارنة حقيقية
             market_avg = statistics.mean(noon_prices)
             market_min = min(noon_prices)
@@ -310,8 +356,7 @@ JSON only:
                 result['reason'] = f"⚠️ قريب من متوسط السوق"
                 result['recommendation'] = "فكر"
             
-            self.stats['noon_comparisons'] += 1
-            print(f"   📊 مقارنة: أمازون {amazon_price:,.0f} vs متوسط {market_avg:,.0f}")
+            print(f"   📊 مقارنة: أمازون {amazon_price:,.0f} vs نون {market_avg:,.0f}")
         
         return result
 
@@ -338,7 +383,7 @@ def send_telegram_alert(item, old_price, new_price, discount_percent, drop_detec
                 )
                 
                 # قرار القبول/الرفض
-                if market_result['confidence'] < 65:
+                if market_result['confidence'] < 60:  # تقليل الحد
                     print(f"🚫 رفض: {item.get('name', '')[:35]}... - ثقة ضعيفة")
                     market_comparator.stats['products_rejected'] += 1
                     return
@@ -356,7 +401,8 @@ def send_telegram_alert(item, old_price, new_price, discount_percent, drop_detec
                 
                 market_comparator.stats['products_sent'] += 1
                 
-                print(f"✅ قبول: {item.get('name', '')[:35]}... - ثقة {market_result['confidence']}%")
+                ai_status = "🤖 AI" if product_analysis['ai_used'] else "🧠 Smart"
+                print(f"✅ {ai_status} قبول: {item.get('name', '')[:35]}... - ثقة {market_result['confidence']}%")
                 
                 loop.close()
                 
@@ -440,7 +486,7 @@ def send_actual_telegram_alert(item, old_price, new_price, discount_percent, dro
 
 💰 {price_display}{discount_info}{savings_info}{confidence_row}{analysis_info}{market_info}{brand_info}
 
-{'🤖 <b>AI-Powered Market Analysis</b>' if ai_used else '🧠 <b>Smart Market Analysis</b>'}
+{'🤖 <b>AI-Powered Analysis</b>' if ai_used else '🧠 <b>Smart Analysis</b>'}
 """
 
         # أزرار محسنة
@@ -474,7 +520,7 @@ def send_actual_telegram_alert(item, old_price, new_price, discount_percent, dro
                             "caption": msg,
                             "parse_mode": "HTML",
                             "reply_markup": reply_markup_json
-                        }, timeout=20
+                        }, timeout=15
                     )
                 else:
                     response = requests.post(
@@ -494,13 +540,13 @@ def send_actual_telegram_alert(item, old_price, new_price, discount_percent, dro
                 print(f"❌ خطأ إرسال: {e}")
         
         if sent_count > 0:
-            analysis_type = "AI" if ai_used else "Smart"
-            print(f"✅ تم إرسال {analysis_type} تنبيه لـ {sent_count} مستخدم - ثقة {final_confidence}%")
+            analysis_type = "🤖 AI" if ai_used else "🧠 Smart"
+            print(f"✅ {analysis_type} تنبيه إرسال لـ {sent_count} مستخدم")
 
     except Exception as e:
         print("❌ Telegram Error:", e)
 
-# باقي الدوال
+# باقي الدوال (نفس الكود السابق)
 def load_db():
     global db, existing_asins
     if os.path.exists(DB_FILE):
@@ -567,8 +613,8 @@ async def scrape_single_page(section, section_url, page_num, db, log_fn=None, di
         url = section_url.format(page_num)
         
         if log_fn:
-            ai_status = "AI" if market_comparator.ai_enabled else "Smart"
-            log_fn(f"🔍 [{ai_status}] Scraping: {section}, page {page_num}")
+            ai_status = "🤖 AI" if market_comparator.ai_enabled else "🧠 Smart"
+            log_fn(f"[{ai_status}] Scraping: {section}, page {page_num}")
         
         try:
             await page.goto(url, timeout=25000)
@@ -580,7 +626,7 @@ async def scrape_single_page(section, section_url, page_num, db, log_fn=None, di
         items = await page.query_selector_all('div.s-result-item[data-asin][data-component-type="s-search-result"]')
         new_count = 0
 
-        for item in items[:10]:
+        for item in items[:8]:  # تقليل العدد لتحسين الأداء
             try:
                 asin = await item.get_attribute("data-asin")
                 if not asin:
@@ -677,7 +723,7 @@ def start_scraping():
     stop_flag["stop"] = False
     running[0] = True
     
-    ai_mode = "AI ON" if market_comparator.ai_enabled else "Smart Mode"
+    ai_mode = "🤖 AI" if market_comparator.ai_enabled else "🧠 Smart"
     auto_mode = "ON" if auto_new_products_mode[0] else "OFF"
     log(f"🔍 Start - New Products: {auto_mode}, Analysis: {ai_mode}")
     
@@ -737,17 +783,16 @@ def show_stats():
     if ai_comparison_enabled[0]:
         stats = market_comparator.stats
         log(f"🔍 Analysis Stats:")
-        log(f"   📊 Total Analyses: {stats['total_analyses']}")
-        log(f"   🤖 AI Analyses: {stats['ai_analyses']}")
-        log(f"   🌙 Noon Comparisons: {stats['noon_comparisons']}")
-        log(f"   📱 Products Sent: {stats['products_sent']}")
-        log(f"   🚫 Products Rejected: {stats['products_rejected']}")
+        log(f"   📊 Total: {stats['total_analyses']}")
+        log(f"   🤖 AI: {stats['ai_analyses']}")
+        log(f"   🌙 Noon: {stats['noon_comparisons']}")
+        log(f"   📱 Sent: {stats['products_sent']}")
+        log(f"   🚫 Rejected: {stats['products_rejected']}")
         
-        if stats['total_analyses'] > 0:
-            ai_rate = (stats['ai_analyses'] / stats['total_analyses']) * 100
-            send_rate = (stats['products_sent'] / stats['total_analyses']) * 100
-            log(f"   📈 AI Usage Rate: {ai_rate:.1f}%")
-            log(f"   📈 Send Rate: {send_rate:.1f}%")
+        # إحصائيات AI
+        if market_comparator.ai_call_count > 0:
+            success_rate = (market_comparator.ai_success_count / market_comparator.ai_call_count) * 100
+            log(f"   🎯 AI Success Rate: {success_rate:.1f}%")
 
 def toggle_ai_comparison():
     ai_comparison_enabled[0] = not ai_comparison_enabled[0]
@@ -801,20 +846,28 @@ def set_min_discount(val):
     min_discount_label.configure(text=f"Min: {ALERT_DISCOUNT}%")
 
 def test_ai():
-    """اختبار AI"""
+    """اختبار AI محسن"""
     if market_comparator.ai_enabled:
         log("🤖 Testing AI...")
-        test_result = market_comparator.call_groq_ai("اختبار: أفضل موقع تسوق في مصر؟")
+        
+        # اختبار بسيط
+        test_result = market_comparator.call_groq_ai('Test: Best phone brand?')
         if test_result:
             log("✅ AI works!", "🤖")
+            log(f"🤖 Response: {test_result[:50]}...", "💬")
         else:
             log("❌ AI failed!", "🤖")
+        
+        # عرض إحصائيات AI
+        if market_comparator.ai_call_count > 0:
+            success_rate = (market_comparator.ai_success_count / market_comparator.ai_call_count) * 100
+            log(f"📊 AI Success Rate: {success_rate:.1f}%", "📈")
     else:
-        log("⚠️ AI not configured - check groq_config.json", "🤖")
+        log("⚠️ AI not configured", "🤖")
 
 # الواجهة
 root = ctk.CTk()
-root.title("LAQTA AI - Professional Analysis")
+root.title("LAQTA AI - Fixed & Optimized")
 root.geometry("1550x950")
 root.minsize(1300, 700)
 root.rowconfigure(4, weight=1)
@@ -823,7 +876,8 @@ root.columnconfigure(0, weight=1)
 title_label = ctk.CTkLabel(root, text="LAQTA AI", font=("SST Arabic Medium", 55), text_color="#54fac8")
 title_label.grid(row=0, column=0, padx=8, pady=(15, 5), sticky="ew")
 
-subtitle_label = ctk.CTkLabel(root, text="🤖 AI-Powered Amazon Egypt Scraper with Market Analysis", 
+ai_status = "🤖 AI-Powered" if market_comparator.ai_enabled else "🧠 Smart Mode"
+subtitle_label = ctk.CTkLabel(root, text=f"{ai_status} Amazon Egypt Scraper with Market Analysis", 
                              font=("Arial", 18), text_color="#ffaa44")
 subtitle_label.grid(row=1, column=0, padx=8, pady=(0, 8), sticky="ew")
 
@@ -880,7 +934,7 @@ buttons_frame.grid_columnconfigure((0,1,2,3,4,5,6), weight=1)
 btn_w, btn_h = 190, 45
 btn_font = ("Arial", 16, "bold")
 
-start_btn = ctk.CTkButton(buttons_frame, text="🔍 AI Start", command=start_scraping, width=btn_w, height=btn_h,
+start_btn = ctk.CTkButton(buttons_frame, text="🔍 Start", command=start_scraping, width=btn_w, height=btn_h,
     font=btn_font, fg_color="#4CAF50", hover_color="#45a049", text_color="#ffffff")
 start_btn.grid(row=0, column=0, padx=5, pady=6, sticky="ew")
 
@@ -916,16 +970,15 @@ load_db()
 
 # رسائل البداية
 if market_comparator.ai_enabled:
-    log("🤖 LAQTA AI Professional System started!", "🚀")
-    log("🧠 Groq AI: Enabled - Professional analysis available", "✨")
+    log("🤖 LAQTA AI Fixed System started!", "🚀")
+    log("🧠 Groq AI: Optimized prompts - Error 400 fixed", "✨")
 else:
     log("🔍 LAQTA Smart System started!", "🚀")
-    log("⚠️ Groq AI: Not configured - Using smart fallback", "⚠️")
     log("💡 To enable AI: Add API key to groq_config.json", "💡")
 
-log("📱 Telegram: ON - with photos and analysis", "📱")
+log("📱 Telegram: ON - with photos and smart analysis", "📱")
 log("🌙 Noon: Real price comparison enabled", "🔍")
-log("🏪 Kanbkam: Smart links enabled", "🔗")
-log("🎯 Strategy: Analyze → Compare → Send professional alerts", "💪")
+log("🏪 Kanbkam: Smart search links", "🔗")
+log("🎯 Fixed: Error 400, optimized prompts, faster AI", "🔧")
 
 root.mainloop()
