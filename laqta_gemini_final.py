@@ -40,17 +40,35 @@ ALERT_DISCOUNT = 15
 existing_asins = set()
 
 def load_gemini_api_key():
-    """تحميل Gemini API key"""
+    """تحميل Gemini API key مع تفاصيل"""
+    print("🔍 فحص Gemini API key...")
+    
     try:
         if os.path.exists('gemini_config.json'):
-            with open('gemini_config.json', 'r') as f:
+            print("✅ ملف gemini_config.json موجود")
+            with open('gemini_config.json', 'r', encoding='utf-8') as f:
                 config = json.load(f)
                 api_key = config.get('gemini_api_key', '')
-                if api_key and 'YOUR_' not in api_key and len(api_key) > 20:
-                    print(f"✅ Gemini API key loaded")
+                
+                print(f"📄 API key من الملف: {api_key[:20] if api_key else 'فارغ'}...")
+                
+                if not api_key:
+                    print("❌ API key فارغ")
+                    return None
+                elif 'YOUR_' in api_key:
+                    print("❌ API key مازال placeholder")
+                    return None
+                elif len(api_key) < 20:
+                    print(f"❌ API key قصير جداً: {len(api_key)} حرف")
+                    return None
+                else:
+                    print(f"✅ Gemini API key صحيح: {api_key[:15]}...{api_key[-6:]}")
                     return api_key
-        return None
-    except:
+        else:
+            print("❌ ملف gemini_config.json غير موجود")
+            return None
+    except Exception as e:
+        print(f"❌ خطأ في تحميل API key: {e}")
         return None
 
 class GeminiMarketComparator:
@@ -77,21 +95,47 @@ class GeminiMarketComparator:
             print("   2. ضعه في gemini_config.json")
     
     def test_gemini(self):
-        """اختبار Gemini"""
+        """اختبار Gemini مع تفاصيل"""
+        print("🧪 اختبار Gemini AI...")
+        
         try:
-            result = self.call_gemini_ai("اختبار")
+            # اختبار بسيط
+            result = self.call_gemini_ai("Hello")
             if result:
-                print("✅ Gemini يعمل بشكل ممتاز!")
+                print(f"✅ Gemini يعمل! الرد: {result[:50]}...")
+                
+                # اختبار مقارنة أسعار
+                test_comparison = self.call_gemini_ai("""مقارنة سريعة:
+المنتج: Samsung Galaxy A06
+سعر أمازون: 2500 جنيه
+
+قارن مع نون وجوميا فقط.
+النتيجة: اسم الموقع | السعر""")
+                
+                if test_comparison:
+                    print(f"✅ Gemini مقارنة الأسعار تعمل!")
+                    print(f"🤖 مثال النتيجة: {test_comparison[:100]}...")
+                    return True
+                else:
+                    print("❌ Gemini مقارنة الأسعار فشلت")
+                    self.ai_enabled = False
+                    return False
             else:
-                print("❌ Gemini فشل الاختبار")
+                print("❌ Gemini فشل الاختبار الأساسي")
                 self.ai_enabled = False
-        except:
+                return False
+        except Exception as e:
+            print(f"❌ Gemini خطأ: {e}")
             self.ai_enabled = False
+            return False
     
     def call_gemini_ai(self, prompt: str) -> Optional[str]:
-        """استدعاء Google Gemini AI"""
+        """استدعاء Google Gemini AI مع تفاصيل"""
         if not self.ai_enabled:
+            print("   ⚠️ Gemini غير مفعل")
             return None
+        
+        print(f"   🤖 Gemini Call: {prompt[:40]}...")
         
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={self.api_key}"
@@ -102,17 +146,27 @@ class GeminiMarketComparator:
                 ]
             }
             
+            print(f"   📡 إرسال طلب إلى Gemini...")
+            
             response = requests.post(url, json=data, timeout=15)
+            
+            print(f"   📊 Gemini Response: {response.status_code}")
             
             if response.status_code == 200:
                 result = response.json()
                 if 'candidates' in result and len(result['candidates']) > 0:
                     content = result['candidates'][0]['content']['parts'][0]['text']
+                    print(f"   ✅ Gemini Success: {content[:60]}...")
                     return content.strip()
-            
-            return None
+                else:
+                    print("   ❌ Gemini: لا توجد نتائج في الرد")
+                    return None
+            else:
+                print(f"   ❌ Gemini Error {response.status_code}: {response.text[:100]}")
+                return None
                 
-        except Exception:
+        except Exception as e:
+            print(f"   ❌ Gemini Exception: {e}")
             return None
     
     def get_comprehensive_comparison(self, product_name: str, amazon_price: float) -> Dict:
