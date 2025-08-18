@@ -812,6 +812,58 @@ def show_stats():
             log(f"   📈 Acceptance Rate: {acceptance_rate:.1f}%")
             log(f"   📈 Brand Recognition Rate: {brand_rate:.1f}%")
 
+def show_analysis_details():
+    """عرض تفاصيل التحليل الذكي"""
+    log("🔍 تفاصيل التحليل الذكي:")
+    log("📊 معايير التقييم:")
+    log("   • 40 نقطة: نسبة الخصم (15% = 10 نقاط، 50% = 35 نقطة)")
+    log("   • 35 نقطة: السعر والعلامة التجارية")
+    log("   • 15 نقطة: تحليل الفئة")
+    log("   • 10 نقاط: نقاط أساسية")
+    log("🎯 مستويات الثقة:")
+    log("   • 80%+ = صفقة ممتازة 🔥")
+    log("   • 65-79% = صفقة جيدة ✅")
+    log("   • 50-64% = صفقة مقبولة ⚡")
+    log("   • أقل من 50% = مرفوضة ❌")
+    log("🏷️ العلامات المدعومة: 50+ علامة تجارية")
+    log("📂 الفئات المدعومة: 9 فئات رئيسية")
+
+def verify_last_deals():
+    """عرض تفاصيل آخر الصفقات للتحقق"""
+    if not alerts_data:
+        log("لا توجد صفقات للعرض")
+        return
+    
+    log("🔍 تفاصيل آخر الصفقات:")
+    
+    # عرض آخر 3 صفقات
+    recent_deals = alerts_data[-3:] if len(alerts_data) >= 3 else alerts_data
+    
+    for i, deal in enumerate(recent_deals, 1):
+        item = deal['item']
+        name = item.get('name', 'Unknown')[:50]
+        confidence = item.get('smart_confidence', 0)
+        reason = item.get('smart_reason', 'No reason')
+        brand = item.get('brand', 'unknown')
+        discount = deal['discount_percent']
+        
+        log(f"🛍️ صفقة {i}: {name}...")
+        log(f"   📈 الثقة: {confidence}% - {reason}")
+        log(f"   🏷️ العلامة: {brand}")
+        log(f"   ⚡ الخصم: {discount:.1f}%")
+        
+        # تفاصيل التحليل
+        analysis_details = item.get('analysis_details', {})
+        if analysis_details:
+            discount_score = analysis_details.get('discount_score', 0)
+            price_score = analysis_details.get('price_score', 0)
+            category_score = analysis_details.get('category_score', 0)
+            final_score = analysis_details.get('final_score', 0)
+            
+            log(f"   📊 التحليل: خصم({discount_score}) + سعر({price_score}) + فئة({category_score}) = {final_score}")
+        
+        log("   " + "-" * 40)
+
 def toggle_smart_analysis():
     smart_analysis_enabled[0] = not smart_analysis_enabled[0]
     status = "SMART INTERNAL ON" if smart_analysis_enabled[0] else "OFF"
@@ -958,10 +1010,23 @@ clear_btn = ctk.CTkButton(buttons_frame, text="🧹 Clear", command=clear_log, w
     font=btn_font, fg_color="#607D8B", hover_color="#455a64", text_color="#ffffff")
 clear_btn.grid(row=0, column=5, padx=5, pady=6, sticky="ew")
 
+# أزرار التحقق الجديدة
+verification_frame = ctk.CTkFrame(root, fg_color="transparent")
+verification_frame.grid(row=6, column=0, padx=10, pady=5, sticky="ew")
+verification_frame.grid_columnconfigure((0,1,2), weight=1)
+
+details_btn = ctk.CTkButton(verification_frame, text="🔍 Analysis Details", command=show_analysis_details, 
+    width=btn_w, height=btn_h, font=btn_font, fg_color="#795548", hover_color="#5d4037", text_color="#ffffff")
+details_btn.grid(row=0, column=0, padx=5, pady=6, sticky="ew")
+
+verify_btn = ctk.CTkButton(verification_frame, text="🛍️ Verify Last Deals", command=verify_last_deals,
+    width=btn_w, height=btn_h, font=btn_font, fg_color="#009688", hover_color="#00695c", text_color="#ffffff")
+verify_btn.grid(row=0, column=1, padx=5, pady=6, sticky="ew")
+
 # زر الخروج الأصلي
 exit_btn = ctk.CTkButton(root, text="Exit ❌", command=exit_app, width=300, height=45,
     font=("Arial Black", 18), fg_color="#232d3a", hover_color="#fa1a50", text_color="#59ff9d")
-exit_btn.grid(row=6, column=0, pady=(8, 12))
+exit_btn.grid(row=7, column=0, pady=(8, 12))
 
 load_db()
 
