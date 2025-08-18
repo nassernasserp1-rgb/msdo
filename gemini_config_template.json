@@ -1,0 +1,21 @@
+{
+    "gemini_api_key": "",
+    "instructions": {
+        "step1": "احصل على API مجاني من: https://makersuite.google.com/app/apikey",
+        "step2": "اضغط 'Create API Key'", 
+        "step3": "انسخ الـ key وضعه في gemini_api_key أعلاه",
+        "step4": "احفظ الملف باسم gemini_config.json"
+    },
+    "benefits": {
+        "comprehensive": "مقارنة شاملة مع جميع المواقع المصرية",
+        "organized": "نتائج منظمة: اسم الموقع | السعر | حالة التوفر",
+        "intelligent": "تحليل ذكي وتوصيات احترافية", 
+        "free": "مجاني - 60 طلب/دقيقة",
+        "reliable": "أكثر استقراراً من Groq"
+    },
+    "example_output": {
+        "format": "نون | 2,800 جنيه | متوفر",
+        "analysis": "متوسط السوق: 3,200 جنيه", 
+        "recommendation": "سعر أمازون ممتاز - وفر 400 جنيه"
+    }
+}
