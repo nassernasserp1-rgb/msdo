@@ -1,0 +1,15 @@
+{
+    "groq_api_key": "",
+    "model": "llama-3.1-70b-versatile",
+    "instructions": {
+        "step1": "Get free API key from: https://console.groq.com",
+        "step2": "Replace empty groq_api_key with your key",
+        "step3": "Your key should start with: gsk_",
+        "example": "gsk_abc123def456ghi789..."
+    },
+    "limits": {
+        "daily_tokens": 100000,
+        "requests_per_minute": 30,
+        "cost": "FREE"
+    }
+}
