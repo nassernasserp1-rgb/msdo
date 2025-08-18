@@ -155,11 +155,24 @@ class SmartInternalAnalyzer:
             'bosch': {'min': 200, 'max': 5000, 'category': 'automotive', 'quality': 'premium'},
             'castrol': {'min': 150, 'max': 1500, 'category': 'automotive', 'quality': 'premium'},
             'shell': {'min': 100, 'max': 1000, 'category': 'automotive', 'quality': 'premium'},
+            
+            # علامات تجارية صينية وغير معروفة (إكسسوارات رخيصة)
+            'uceento': {'min': 50, 'max': 300, 'category': 'accessories', 'quality': 'budget'},
+            'cafele': {'min': 40, 'max': 250, 'category': 'accessories', 'quality': 'budget'},
+            'nillkin': {'min': 60, 'max': 400, 'category': 'accessories', 'quality': 'budget'},
+            'rock': {'min': 80, 'max': 500, 'category': 'accessories', 'quality': 'budget'},
+            'esr': {'min': 70, 'max': 400, 'category': 'accessories', 'quality': 'budget'},
+            'spigen': {'min': 100, 'max': 600, 'category': 'accessories', 'quality': 'good'},
+            'aukey': {'min': 80, 'max': 800, 'category': 'accessories', 'quality': 'budget'},
+            'ravpower': {'min': 150, 'max': 1200, 'category': 'accessories', 'quality': 'good'},
+            'choetech': {'min': 100, 'max': 800, 'category': 'accessories', 'quality': 'budget'},
+            'iniu': {'min': 80, 'max': 600, 'category': 'accessories', 'quality': 'budget'},
         }
         
         # كلمات مفتاحية للفئات
         self.category_keywords = {
             'electronics': ['phone', 'mobile', 'tablet', 'laptop', 'computer', 'tv', 'speaker', 'headphone', 'camera'],
+            'accessories': ['holder', 'mount', 'case', 'cover', 'stand', 'charger', 'cable', 'adapter', 'powerbank', 'magnetic'],
             'beauty': ['cream', 'lotion', 'shampoo', 'conditioner', 'perfume', 'makeup', 'skincare'],
             'personal_care': ['toothbrush', 'toothpaste', 'razor', 'deodorant', 'soap'],
             'kitchen': ['pan', 'pot', 'plate', 'cup', 'knife', 'spoon', 'bowl'],
@@ -181,15 +194,46 @@ class SmartInternalAnalyzer:
             'category_confidence': 0
         }
         
-        # البحث عن العلامة التجارية
+        # استخراج العلامة التجارية الحقيقية من بداية الاسم
+        words = product_name.split()
+        if words:
+            first_word = words[0].lower()
+            # البحث عن العلامة في الكلمة الأولى أولاً
+            for brand, info in self.comprehensive_brand_guide.items():
+                if brand == first_word:
+                    result['brand'] = brand
+                    result['brand_info'] = info
+                    result['category'] = info['category']
+                    result['category_confidence'] = 95
+                    self.stats['brand_matches'] += 1
+                    return result
+        
+        # إذا لم نجد في الكلمة الأولى، نبحث في النص كله مع تجاهل الكلمات المضللة
+        misleading_contexts = [
+            'compatible with', 'for', 'works with', 'supports', 'fits',
+            'متوافق مع', 'يعمل مع', 'يدعم'
+        ]
+        
+        # فحص إذا كانت العلامة في سياق مضلل
         for brand, info in self.comprehensive_brand_guide.items():
             if brand in name_lower:
-                result['brand'] = brand
-                result['brand_info'] = info
-                result['category'] = info['category']
-                result['category_confidence'] = 90
-                self.stats['brand_matches'] += 1
-                break
+                # فحص السياق
+                is_misleading = False
+                for context in misleading_contexts:
+                    if context in name_lower and brand in name_lower:
+                        brand_pos = name_lower.find(brand)
+                        context_pos = name_lower.find(context)
+                        if abs(brand_pos - context_pos) < 20:  # قريب من السياق المضلل
+                            is_misleading = True
+                            break
+                
+                if not is_misleading:
+                    result['brand'] = brand
+                    result['brand_info'] = info
+                    result['category'] = info['category']
+                    result['category_confidence'] = 90
+                    self.stats['brand_matches'] += 1
+                    break
         
         # إذا لم نجد العلامة التجارية، نحاول تحديد الفئة من الكلمات
         if result['brand'] == 'unknown':
@@ -316,6 +360,7 @@ class SmartInternalAnalyzer:
         # تقييم بناءً على الفئة والسعر
         category_ranges = {
             'electronics': {'low': 1000, 'high': 10000},
+            'accessories': {'low': 50, 'high': 400},  # إكسسوارات رخيصة
             'beauty': {'low': 50, 'high': 300},
             'personal_care': {'low': 30, 'high': 200},
             'kitchen': {'low': 100, 'high': 1000},
