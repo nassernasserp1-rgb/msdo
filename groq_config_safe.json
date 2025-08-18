@@ -1,0 +1,16 @@
+{
+    "groq_api_key": "",
+    "model": "llama-3.1-70b-versatile",
+    "max_tokens_per_request": 400,
+    "temperature": 0.2,
+    "daily_token_limit": 100000,
+    "requests_per_minute": 30,
+    "timeout_seconds": 20,
+    "cache_enabled": true,
+    "fallback_enabled": true,
+    "instructions": {
+        "how_to_setup": "1. Get free API key from console.groq.com",
+        "where_to_put": "Replace empty groq_api_key with your key",
+        "example": "gsk_abc123def456... (starts with gsk_)"
+    }
+}
