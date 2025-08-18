@@ -1,0 +1,9 @@
+# LAQTA AI System - Error 400 Fixed
+customtkinter>=5.2.0
+requests>=2.31.0
+playwright>=1.40.0
+Pillow>=10.0.0
+
+# Installation:
+# pip install -r requirements_fixed.txt
+# playwright install chromium

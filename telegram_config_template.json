@@ -1,0 +1,7 @@
+{
+  "bot_token": "YOUR_BOT_TOKEN_HERE",
+  "users": [
+    "YOUR_CHAT_ID_HERE"
+  ],
+  "note": "Get bot token from @BotFather and your chat ID"
+}
