@@ -647,30 +647,30 @@
             });
         }
 
-        function downloadProtectionFile() {
-            const code = document.getElementById('protectionCode').textContent;
-            const blob = new Blob([code], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = \`affiliate-protected-\${currentTag}-\${Date.now()}.html\`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showStatus('💾 تم تحميل الملف بنجاح!', 'success');
-        }
+                 function downloadProtectionFile() {
+             const code = document.getElementById('protectionCode').textContent;
+             const blob = new Blob([code], { type: 'text/html' });
+             const url = URL.createObjectURL(blob);
+             
+             const a = document.createElement('a');
+             a.href = url;
+             a.download = `affiliate-protected-${currentTag}-${Date.now()}.html`;
+             document.body.appendChild(a);
+             a.click();
+             document.body.removeChild(a);
+             URL.revokeObjectURL(url);
+             
+             showStatus('💾 تم تحميل الملف بنجاح!', 'success');
+         }
 
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('statusMessage');
-            statusDiv.innerHTML = \`<div class="status \${type}">\${message}</div>\`;
-            
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 5000);
-        }
+                 function showStatus(message, type = 'info') {
+             const statusDiv = document.getElementById('statusMessage');
+             statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+             
+             setTimeout(() => {
+                 statusDiv.innerHTML = '';
+             }, 5000);
+         }
 
         // تحسينات تفاعلية
         document.getElementById('originalLink').addEventListener('paste', (e) => {
