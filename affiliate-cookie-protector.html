@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام حماية كوكيز الأفيليت</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        /* نافذة الموافقة على الكوكيز */
+        .consent-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .consent-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .consent-modal h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .consent-modal p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: right;
+        }
+        
+        .consent-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+        
+        .btn-accept {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .btn-decline {
+            background: linear-gradient(45deg, #f56565, #e53e3e);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        /* النموذج الرئيسي */
+        .form-section {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .form-section h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        /* قسم العرض */
+        .output-section {
+            background: #edf2f7;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .generated-code {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .success { 
+            background: #c6f6d5; 
+            color: #22543d; 
+            border: 1px solid #9ae6b4; 
+        }
+        
+        .error { 
+            background: #fed7d7; 
+            color: #c53030; 
+            border: 1px solid #feb2b2; 
+        }
+        
+        .warning { 
+            background: #fef5e7; 
+            color: #c05621; 
+            border: 1px solid #f6e05e; 
+        }
+        
+        .info-box {
+            background: #bee3f8;
+            border: 1px solid #90cdf4;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #2c5282;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .protection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+            z-index: 100;
+            display: none;
+        }
+        
+        .protection-status.active {
+            display: block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- نافذة الموافقة على الكوكيز -->
+    <div id="consentOverlay" class="consent-overlay hidden">
+        <div class="consent-modal">
+            <h2>🍪 موافقة استخدام الكوكيز</h2>
+            <p>
+                <strong>نريد حفظ كوكيز الأفيليت على جهازك لمدة 24 ساعة لضمان حصولنا على العمولة من مشترياتك.</strong>
+                <br><br>
+                <strong>ما سيحدث:</strong><br>
+                • سيتم حفظ معرف الأفيليت الخاص بنا على جهازك<br>
+                • الكوكيز ستبقى محمية من التغيير لمدة 24 ساعة<br>
+                • لن يتم جمع أي بيانات شخصية<br>
+                • يمكنك حذف الكوكيز يدوياً في أي وقت<br><br>
+                <strong>هذا يساعدنا في الحصول على عمولة صغيرة من أمازون دون أي تكلفة إضافية عليك</strong>
+            </p>
+            <div class="consent-buttons">
+                <button class="btn btn-accept" onclick="acceptCookies()">
+                    ✅ موافق، احفظ الكوكيز
+                </button>
+                <button class="btn btn-decline" onclick="declineCookies()">
+                    ❌ لا، شكراً
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مؤشر الحماية النشطة -->
+    <div id="protectionStatus" class="protection-status">
+        🛡️ الحماية نشطة
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ نظام حماية كوكيز الأفيليت</h1>
+            <p>حل احترافي لحماية كوكيز الأفيليت على أجهزة العملاء</p>
+        </div>
+
+        <!-- المميزات الرئيسية -->
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <h4>حماية قانونية</h4>
+                <p>موافقة صريحة من العميل قبل حفظ الكوكيز</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⏰</div>
+                <h4>مدة محددة</h4>
+                <p>24 ساعة كحد أقصى حسب المعايير القانونية</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🛡️</div>
+                <h4>حماية متقدمة</h4>
+                <p>منع استبدال الكوكيز بكوكيز منافسة</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🌐</div>
+                <h4>عمل تلقائي</h4>
+                <p>يعمل في الخلفية دون تدخل من العميل</p>
+            </div>
+        </div>
+
+        <!-- إنشاء الكود -->
+        <div class="form-section">
+            <h3>🔧 إنشاء كود الحماية المخصص</h3>
+            
+            <div class="form-group">
+                <label>🏷️ Amazon Affiliate Tag:</label>
+                <input type="text" id="affiliateTag" placeholder="مثال: yourname-21" maxlength="50">
+            </div>
+            
+            <div class="form-group">
+                <label>🌍 Amazon Domain:</label>
+                <select id="amazonDomain">
+                    <option value="amazon.com">Amazon.com (الولايات المتحدة)</option>
+                    <option value="amazon.co.uk">Amazon.co.uk (المملكة المتحدة)</option>
+                    <option value="amazon.de">Amazon.de (ألمانيا)</option>
+                    <option value="amazon.fr">Amazon.fr (فرنسا)</option>
+                    <option value="amazon.ae">Amazon.ae (الإمارات)</option>
+                    <option value="amazon.sa">Amazon.sa (السعودية)</option>
+                    <option value="amazon.eg">Amazon.eg (مصر)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>⏰ مدة الحماية (ساعات - أقصى 24):</label>
+                <input type="number" id="protectionDuration" value="24" min="1" max="24">
+            </div>
+            
+            <div class="form-group">
+                <label>🎨 لون نافذة الموافقة:</label>
+                <select id="modalTheme">
+                    <option value="blue">أزرق (افتراضي)</option>
+                    <option value="green">أخضر</option>
+                    <option value="orange">برتقالي</option>
+                    <option value="purple">بنفسجي</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>📝 رسالة الموافقة المخصصة (اختيارية):</label>
+                <textarea id="customMessage" rows="3" placeholder="اتركها فارغة لاستخدام الرسالة الافتراضية"></textarea>
+            </div>
+            
+            <button class="btn btn-primary" onclick="generateProtectionCode()">
+                🚀 إنشاء كود الحماية
+            </button>
+        </div>
+
+        <!-- عرض الكود المُولد -->
+        <div id="outputSection" class="output-section hidden">
+            <h3>📋 كود الحماية الجاهز للاستخدام:</h3>
+            
+            <div class="info-box">
+                <strong>📌 تعليمات الاستخدام:</strong><br>
+                1. انسخ الكود أدناه<br>
+                2. ضعه في أي صفحة HTML تريد حماية كوكيز الأفيليت بها<br>
+                3. ضع الكود قبل إغلاق تاج &lt;/body&gt;<br>
+                4. سيعمل تلقائياً مع كل زائر جديد
+            </div>
+            
+            <div class="generated-code" id="generatedCode"></div>
+            
+            <button class="btn btn-primary" onclick="copyGeneratedCode()">
+                📋 نسخ الكود
+            </button>
+            
+            <button class="btn btn-primary" onclick="testProtectionSystem()" style="margin-top: 10px;">
+                🧪 اختبار النظام
+            </button>
+        </div>
+
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        // نظام إدارة الكوكيز المحمية
+        class ClientCookieProtector {
+            constructor() {
+                this.storageKey = 'affiliate_protection';
+                this.consentKey = 'cookie_consent';
+                this.protectionActive = false;
+                this.checkInterval = null;
+                this.affiliateData = null;
+            }
+
+            // فحص الموافقة المحفوظة
+            hasValidConsent() {
+                const consent = localStorage.getItem(this.consentKey);
+                if (!consent) return false;
+                
+                const consentData = JSON.parse(consent);
+                return Date.now() < consentData.expires;
+            }
+
+            // عرض نافذة الموافقة
+            showConsentModal(config = {}) {
+                return new Promise((resolve) => {
+                    if (this.hasValidConsent()) {
+                        resolve(true);
+                        return;
+                    }
+
+                    const overlay = document.getElementById('consentOverlay');
+                    if (overlay) {
+                        overlay.classList.remove('hidden');
+                        
+                        // تحديث الرسالة إذا كانت مخصصة
+                        if (config.customMessage) {
+                            const messageElement = overlay.querySelector('p');
+                            messageElement.innerHTML = config.customMessage;
+                        }
+                        
+                        window.consentResolve = resolve;
+                    } else {
+                        resolve(false);
+                    }
+                });
+            }
+
+            // حفظ موافقة المستخدم
+            saveConsent(accepted) {
+                const consentData = {
+                    accepted: accepted,
+                    timestamp: Date.now(),
+                    expires: Date.now() + (24 * 60 * 60 * 1000) // 24 ساعة
+                };
+                
+                localStorage.setItem(this.consentKey, JSON.stringify(consentData));
+                return accepted;
+            }
+
+            // تفعيل الحماية
+            activateProtection(affiliateTag, domain, duration = 24) {
+                if (!this.hasValidConsent()) return false;
+
+                this.affiliateData = {
+                    tag: affiliateTag,
+                    domain: domain,
+                    timestamp: Date.now(),
+                    expires: Date.now() + (duration * 60 * 60 * 1000)
+                };
+
+                // حفظ في localStorage (أكثر ثباتاً من الكوكيز)
+                localStorage.setItem(this.storageKey, JSON.stringify(this.affiliateData));
+                
+                // حفظ في الكوكيز أيضاً
+                this.setCookie('amazon_affiliate', affiliateTag, duration);
+                
+                // بدء المراقبة
+                this.startProtectionMonitoring();
+                
+                // إظهار مؤشر الحماية
+                this.showProtectionStatus();
+                
+                this.protectionActive = true;
+                return true;
+            }
+
+            // مراقبة الكوكيز وحمايتها
+            startProtectionMonitoring() {
+                if (this.checkInterval) {
+                    clearInterval(this.checkInterval);
+                }
+
+                this.checkInterval = setInterval(() => {
+                    if (!this.affiliateData || Date.now() > this.affiliateData.expires) {
+                        this.stopProtection();
+                        return;
+                    }
+
+                    // فحص الكوكيز الحالية
+                    const currentCookie = this.getCookie('amazon_affiliate');
+                    
+                    // إذا تغيرت الكوكيز أو حُذفت، أعدها
+                    if (currentCookie !== this.affiliateData.tag) {
+                        this.restoreAffiliateData();
+                        console.log('🛡️ تم استعادة كوكيز الأفيليت المحمية');
+                    }
+
+                    // حماية من محاولات JavaScript لتغيير الكوكيز
+                    this.protectFromScriptAccess();
+                    
+                }, 3000); // فحص كل 3 ثوان
+            }
+
+            // استعادة بيانات الأفيليت
+            restoreAffiliateData() {
+                if (!this.affiliateData) return;
+
+                // استعادة من localStorage
+                const stored = localStorage.getItem(this.storageKey);
+                if (stored) {
+                    this.affiliateData = JSON.parse(stored);
+                }
+
+                // إعادة تعيين الكوكيز
+                const remainingHours = (this.affiliateData.expires - Date.now()) / (60 * 60 * 1000);
+                if (remainingHours > 0) {
+                    this.setCookie('amazon_affiliate', this.affiliateData.tag, Math.ceil(remainingHours));
+                    
+                    // تطبيق على روابط أمازون الموجودة في الصفحة
+                    this.updateAmazonLinks();
+                }
+            }
+
+            // حماية من الوصول عبر JavaScript
+            protectFromScriptAccess() {
+                // حماية localStorage
+                const originalSetItem = localStorage.setItem;
+                localStorage.setItem = function(key, value) {
+                    if (key === 'affiliate_protection') {
+                        console.warn('🛡️ محاولة تغيير بيانات محمية - تم الرفض');
+                        return;
+                    }
+                    return originalSetItem.call(this, key, value);
+                };
+
+                // حماية إضافية للكوكيز
+                const originalDocumentCookie = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
+                Object.defineProperty(document, 'cookie', {
+                    get: originalDocumentCookie.get,
+                    set: function(value) {
+                        if (value.includes('amazon_affiliate') && !value.includes(protector.affiliateData?.tag)) {
+                            console.warn('🛡️ محاولة تغيير كوكيز الأفيليت - تم الرفض');
+                            return;
+                        }
+                        return originalDocumentCookie.set.call(document, value);
+                    }
+                });
+            }
+
+            // تحديث روابط أمازون في الصفحة
+            updateAmazonLinks() {
+                if (!this.affiliateData) return;
+
+                const amazonLinks = document.querySelectorAll('a[href*="amazon."]');
+                amazonLinks.forEach(link => {
+                    const url = new URL(link.href);
+                    url.searchParams.set('tag', this.affiliateData.tag);
+                    link.href = url.toString();
+                });
+            }
+
+            // إيقاف الحماية
+            stopProtection() {
+                if (this.checkInterval) {
+                    clearInterval(this.checkInterval);
+                    this.checkInterval = null;
+                }
+                
+                this.protectionActive = false;
+                this.hideProtectionStatus();
+                
+                // تنظيف البيانات المنتهية الصلاحية
+                const stored = localStorage.getItem(this.storageKey);
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    if (Date.now() > data.expires) {
+                        localStorage.removeItem(this.storageKey);
+                    }
+                }
+            }
+
+            // إظهار مؤشر الحماية
+            showProtectionStatus() {
+                const statusElement = document.getElementById('protectionStatus');
+                if (statusElement) {
+                    statusElement.classList.add('active');
+                }
+            }
+
+            // إخفاء مؤشر الحماية
+            hideProtectionStatus() {
+                const statusElement = document.getElementById('protectionStatus');
+                if (statusElement) {
+                    statusElement.classList.remove('active');
+                }
+            }
+
+            // وظائف الكوكيز المساعدة
+            setCookie(name, value, hours) {
+                const expires = new Date();
+                expires.setTime(expires.getTime() + (hours * 60 * 60 * 1000));
+                document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+            }
+
+            getCookie(name) {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [key, value] = cookie.trim().split('=');
+                    if (key === name) {
+                        return value;
+                    }
+                }
+                return null;
+            }
+
+            // تحقق من وجود بيانات محفوظة وإعادة تفعيلها
+            restoreFromStorage() {
+                const stored = localStorage.getItem(this.storageKey);
+                if (!stored || !this.hasValidConsent()) return false;
+
+                const data = JSON.parse(stored);
+                if (Date.now() < data.expires) {
+                    this.affiliateData = data;
+                    const remainingHours = (data.expires - Date.now()) / (60 * 60 * 1000);
+                    
+                    // إعادة تفعيل الحماية
+                    this.setCookie('amazon_affiliate', data.tag, Math.ceil(remainingHours));
+                    this.startProtectionMonitoring();
+                    this.showProtectionStatus();
+                    this.protectionActive = true;
+                    
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // إنشاء مثيل من المحمي
+        const protector = new ClientCookieProtector();
+
+        // وظائف الواجهة
+        function acceptCookies() {
+            protector.saveConsent(true);
+            document.getElementById('consentOverlay').classList.add('hidden');
+            if (window.consentResolve) window.consentResolve(true);
+            showStatus('✅ تم قبول الكوكيز - سيتم تفعيل الحماية', 'success');
+        }
+
+        function declineCookies() {
+            protector.saveConsent(false);
+            document.getElementById('consentOverlay').classList.add('hidden');
+            if (window.consentResolve) window.consentResolve(false);
+            showStatus('❌ تم رفض الكوكيز - لن يتم تفعيل الحماية', 'warning');
+        }
+
+        // إنشاء كود الحماية
+        function generateProtectionCode() {
+            const affiliateTag = document.getElementById('affiliateTag').value.trim();
+            const domain = document.getElementById('amazonDomain').value;
+            const duration = parseInt(document.getElementById('protectionDuration').value) || 24;
+            const theme = document.getElementById('modalTheme').value;
+            const customMessage = document.getElementById('customMessage').value.trim();
+
+            if (!affiliateTag) {
+                showStatus('يرجى إدخال Affiliate Tag', 'error');
+                return;
+            }
+
+            const generatedCode = `
+<!-- نظام حماية كوكيز الأفيليت -->
+<script>
+// ${affiliateTag} - نظام الحماية المتقدم
+(function() {
+    'use strict';
+    
+    const config = {
+        affiliateTag: '${affiliateTag}',
+        domain: '${domain}',
+        duration: ${duration},
+        theme: '${theme}',
+        customMessage: ${customMessage ? `'${customMessage.replace(/'/g, "\\'")}'` : 'null'}
+    };
+
+    // نظام إدارة الكوكيز المحمية
+    class AffiliateProtector {
+        constructor(cfg) {
+            this.config = cfg;
+            this.storageKey = 'aff_protection_' + cfg.affiliateTag;
+            this.consentKey = 'cookie_consent_' + cfg.affiliateTag;
+            this.protectionActive = false;
+            this.checkInterval = null;
+            this.init();
+        }
+
+        init() {
+            // فحص الموافقة المحفوظة
+            if (this.hasValidConsent()) {
+                this.restoreFromStorage();
+            } else {
+                this.showConsentModal();
+            }
+        }
+
+        hasValidConsent() {
+            try {
+                const consent = localStorage.getItem(this.consentKey);
+                if (!consent) return false;
+                const data = JSON.parse(consent);
+                return data.accepted && Date.now() < data.expires;
+            } catch(e) {
+                return false;
+            }
+        }
+
+        showConsentModal() {
+            const modalHTML = \`
+                <div id="affiliateConsent" style="
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 999999;
+                    display: flex; align-items: center; justify-content: center;
+                    backdrop-filter: blur(5px); font-family: Arial, sans-serif;
+                ">
+                    <div style="
+                        background: white; border-radius: 15px; padding: 30px;
+                        max-width: 500px; width: 90%; text-align: center;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                        animation: slideIn 0.3s ease-out;
+                    ">
+                        <h2 style="margin: 0 0 15px 0; color: #333;">🍪 موافقة الكوكيز</h2>
+                        <p style="margin: 0 0 20px 0; line-height: 1.6; color: #555; text-align: right;">
+                            \${this.config.customMessage || \`
+                            نريد حفظ كوكيز الأفيليت لمدة \${this.config.duration} ساعة لضمان حصولنا على العمولة.<br>
+                            <strong>لن يتم جمع أي بيانات شخصية وستبقى الكوكيز محمية من التغيير.</strong>
+                            \`}
+                        </p>
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="acceptAffiliateConsent()" style="
+                                background: linear-gradient(45deg, #48bb78, #38a169); color: white;
+                                border: none; padding: 12px 25px; border-radius: 8px;
+                                font-weight: 600; cursor: pointer; min-width: 120px;
+                                transition: transform 0.2s ease;
+                            " onmouseover="this.style.transform='translateY(-2px)'" 
+                               onmouseout="this.style.transform='translateY(0)'">
+                                ✅ موافق
+                            </button>
+                            <button onclick="declineAffiliateConsent()" style="
+                                background: linear-gradient(45deg, #f56565, #e53e3e); color: white;
+                                border: none; padding: 12px 25px; border-radius: 8px;
+                                font-weight: 600; cursor: pointer; min-width: 120px;
+                                transition: transform 0.2s ease;
+                            " onmouseover="this.style.transform='translateY(-2px)'" 
+                               onmouseout="this.style.transform='translateY(0)'">
+                                ❌ لا شكراً
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            \`;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // إضافة الستايلات المتحركة
+            const style = document.createElement('style');
+            style.textContent = \`
+                @keyframes slideIn {
+                    from { transform: translateY(-50px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            \`;
+            document.head.appendChild(style);
+
+            // وظائف الموافقة
+            window.acceptAffiliateConsent = () => {
+                this.saveConsent(true);
+                document.getElementById('affiliateConsent').remove();
+                this.activateProtection();
+            };
+
+            window.declineAffiliateConsent = () => {
+                this.saveConsent(false);
+                document.getElementById('affiliateConsent').remove();
+            };
+        }
+
+        saveConsent(accepted) {
+            const consentData = {
+                accepted: accepted,
+                timestamp: Date.now(),
+                expires: Date.now() + (this.config.duration * 60 * 60 * 1000)
+            };
+            localStorage.setItem(this.consentKey, JSON.stringify(consentData));
+        }
+
+        activateProtection() {
+            if (!this.hasValidConsent()) return false;
+
+            const affiliateData = {
+                tag: this.config.affiliateTag,
+                domain: this.config.domain,
+                timestamp: Date.now(),
+                expires: Date.now() + (this.config.duration * 60 * 60 * 1000)
+            };
+
+            // حفظ البيانات
+            localStorage.setItem(this.storageKey, JSON.stringify(affiliateData));
+            this.setCookie('amazon_affiliate', this.config.affiliateTag, this.config.duration);
+            
+            // بدء المراقبة
+            this.startProtectionMonitoring(affiliateData);
+            this.showProtectionIndicator();
+            
+            console.log('🛡️ تم تفعيل حماية الأفيليت لمدة ' + this.config.duration + ' ساعة');
+            return true;
+        }
+
+        startProtectionMonitoring(affiliateData) {
+            if (this.checkInterval) clearInterval(this.checkInterval);
+
+            this.checkInterval = setInterval(() => {
+                if (Date.now() > affiliateData.expires) {
+                    this.stopProtection();
+                    return;
+                }
+
+                // فحص وإعادة تعيين الكوكيز إذا تغيرت
+                const currentCookie = this.getCookie('amazon_affiliate');
+                if (currentCookie !== this.config.affiliateTag) {
+                    this.setCookie('amazon_affiliate', this.config.affiliateTag, 
+                        Math.ceil((affiliateData.expires - Date.now()) / (60 * 60 * 1000)));
+                    console.log('🔄 تم استعادة كوكيز الأفيليت');
+                }
+
+                // تحديث روابط أمازون في الصفحة
+                this.updateAmazonLinks();
+            }, 3000);
+
+            this.protectionActive = true;
+        }
+
+        updateAmazonLinks() {
+            const links = document.querySelectorAll('a[href*="' + this.config.domain + '"]');
+            links.forEach(link => {
+                try {
+                    const url = new URL(link.href);
+                    if (!url.searchParams.get('tag') || url.searchParams.get('tag') !== this.config.affiliateTag) {
+                        url.searchParams.set('tag', this.config.affiliateTag);
+                        url.searchParams.set('linkCode', 'as2');
+                        link.href = url.toString();
+                    }
+                } catch(e) {}
+            });
+        }
+
+        showProtectionIndicator() {
+            if (document.getElementById('affProtectionIndicator')) return;
+
+            const indicator = document.createElement('div');
+            indicator.id = 'affProtectionIndicator';
+            indicator.style.cssText = \`
+                position: fixed; top: 20px; right: 20px; z-index: 999998;
+                background: linear-gradient(45deg, #48bb78, #38a169);
+                color: white; padding: 8px 15px; border-radius: 20px;
+                font-size: 12px; font-weight: bold; box-shadow: 0 4px 15px rgba(72,187,120,0.3);
+                animation: pulse 2s infinite; font-family: Arial, sans-serif;
+            \`;
+            indicator.textContent = '🛡️ الحماية نشطة';
+            document.body.appendChild(indicator);
+
+            // إضافة أنيميشن النبض
+            const pulseStyle = document.createElement('style');
+            pulseStyle.textContent = \`
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.8; transform: scale(1.05); }
+                }
+            \`;
+            document.head.appendChild(pulseStyle);
+        }
+
+        stopProtection() {
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval);
+                this.checkInterval = null;
+            }
+            
+            const indicator = document.getElementById('affProtectionIndicator');
+            if (indicator) indicator.remove();
+            
+            this.protectionActive = false;
+            console.log('⏰ انتهت مدة حماية الأفيليت');
+        }
+
+        restoreFromStorage() {
+            try {
+                const stored = localStorage.getItem(this.storageKey);
+                if (!stored) return false;
+
+                const data = JSON.parse(stored);
+                if (Date.now() < data.expires) {
+                    // إعادة تفعيل الحماية
+                    this.setCookie('amazon_affiliate', data.tag, 
+                        Math.ceil((data.expires - Date.now()) / (60 * 60 * 1000)));
+                    this.startProtectionMonitoring(data);
+                    this.showProtectionIndicator();
+                    return true;
+                }
+            } catch(e) {}
+            return false;
+        }
+
+        setCookie(name, value, hours) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (hours * 60 * 60 * 1000));
+            document.cookie = \`\${name}=\${value}; expires=\${expires.toUTCString()}; path=/; SameSite=Lax\`;
+        }
+
+        getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === name) return value;
+            }
+            return null;
+        }
+    }
+
+    // تفعيل النظام
+    new AffiliateProtector(config);
+
+})();
+</script>
+<!-- نهاية نظام حماية الكوكيز -->`;
+
+            document.getElementById('generatedCode').textContent = generatedCode;
+            document.getElementById('outputSection').classList.remove('hidden');
+            showStatus('✅ تم إنشاء كود الحماية بنجاح!', 'success');
+        }
+
+        function copyGeneratedCode() {
+            const codeElement = document.getElementById('generatedCode');
+            const code = codeElement.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                showStatus('📋 تم نسخ الكود بنجاح!', 'success');
+            }).catch(() => {
+                // طريقة بديلة للنسخ
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showStatus('📋 تم نسخ الكود بنجاح!', 'success');
+            });
+        }
+
+        function testProtectionSystem() {
+            const affiliateTag = document.getElementById('affiliateTag').value.trim();
+            const domain = document.getElementById('amazonDomain').value;
+            const duration = parseInt(document.getElementById('protectionDuration').value) || 24;
+
+            if (!affiliateTag) {
+                showStatus('يرجى إدخال Affiliate Tag أولاً', 'error');
+                return;
+            }
+
+            // محاكاة اختبار النظام
+            protector.showConsentModal().then((accepted) => {
+                if (accepted) {
+                    const success = protector.activateProtection(affiliateTag, domain, duration);
+                    if (success) {
+                        showStatus('✅ تم تفعيل النظام بنجاح! الحماية تعمل الآن', 'success');
+                    } else {
+                        showStatus('❌ فشل في تفعيل النظام', 'error');
+                    }
+                } else {
+                    showStatus('❌ تم رفض الكوكيز - لن يعمل النظام', 'warning');
+                }
+            });
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // تحقق من وجود حماية سابقة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            protector.restoreFromStorage();
+        });
+    </script>
+</body>
+</html>
