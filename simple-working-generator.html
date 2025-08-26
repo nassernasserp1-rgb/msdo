@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد روابط الأفيليت - مُبسط وشغال</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .result-box {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .code-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .success { background: #c6f6d5; color: #22543d; }
+        .error { background: #fed7d7; color: #c53030; }
+        .info { background: #bee3f8; color: #2c5282; }
+        
+        .hidden { display: none !important; }
+        
+        .extract-section {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // تعريف جميع الدوال في البداية
+        function showStatus(message, type) {
+            var statusDiv = document.getElementById('status');
+            if (statusDiv) {
+                statusDiv.innerHTML = '<div class="status ' + type + '">' + message + '</div>';
+                setTimeout(function() {
+                    statusDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        function extractTag() {
+            var fullLink = document.getElementById('fullLink').value.trim();
+            if (!fullLink) {
+                showStatus('❌ يرجى إدخال الرابط أولاً', 'error');
+                return;
+            }
+
+            try {
+                var tagMatch = fullLink.match(/[?&]tag=([^&]+)/);
+                if (tagMatch && tagMatch[1]) {
+                    var tag = tagMatch[1];
+                    document.getElementById('tag').value = tag;
+                    showStatus('✅ تم استخراج التاج: ' + tag, 'success');
+                    
+                    // استخراج الرابط الأساسي
+                    var url = new URL(fullLink.indexOf('http') === 0 ? fullLink : 'https://' + fullLink);
+                    var basicPath = url.pathname.match(/\/dp\/[A-Z0-9]+/);
+                    if (basicPath) {
+                        var basicLink = 'https://' + url.hostname + basicPath[0];
+                        document.getElementById('productLink').value = basicLink;
+                        showStatus('✅ تم استخراج الرابط الأساسي أيضاً', 'success');
+                    }
+                } else {
+                    showStatus('❌ لم يتم العثور على التاج في الرابط', 'error');
+                }
+            } catch (error) {
+                showStatus('❌ خطأ في معالجة الرابط', 'error');
+            }
+        }
+
+        function generateLink() {
+            var tag = document.getElementById('tag').value.trim();
+            var domain = document.getElementById('domain').value;
+            var productLink = document.getElementById('productLink').value.trim();
+
+            if (!tag) {
+                showStatus('❌ يرجى إدخال التاج', 'error');
+                return;
+            }
+
+            if (!productLink) {
+                showStatus('❌ يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+
+            try {
+                var cleanLink = productLink.indexOf('http') === 0 ? productLink : 'https://' + productLink;
+                var url = new URL(cleanLink);
+                
+                if (url.hostname.indexOf('amazon') === -1) {
+                    showStatus('❌ الرابط يجب أن يكون من أمازون', 'error');
+                    return;
+                }
+
+                url.hostname = domain;
+                url.search = '';
+                
+                var params = new URLSearchParams();
+                params.set('tag', tag);
+                params.set('linkCode', 'as2');
+                params.set('camp', '247');
+                params.set('creative', '1211');
+                params.set('ascsubtag', 'gen_' + Date.now());
+
+                url.search = params.toString();
+
+                window.generatedLink = url.toString();
+                window.currentTag = tag;
+                window.currentDomain = domain;
+
+                document.getElementById('result').textContent = window.generatedLink;
+                document.getElementById('resultSection').classList.remove('hidden');
+                
+                showStatus('✅ تم توليد الرابط بنجاح!', 'success');
+
+            } catch (error) {
+                showStatus('❌ خطأ في التوليد: ' + error.message, 'error');
+            }
+        }
+
+        function copyLink() {
+            if (!window.generatedLink) {
+                showStatus('❌ لا يوجد رابط للنسخ', 'error');
+                return;
+            }
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.generatedLink).then(function() {
+                    showStatus('✅ تم نسخ الرابط!', 'success');
+                }).catch(function() {
+                    fallbackCopy(window.generatedLink);
+                });
+            } else {
+                fallbackCopy(window.generatedLink);
+            }
+        }
+
+        function fallbackCopy(text) {
+            var textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showStatus('✅ تم نسخ الرابط!', 'success');
+            } catch (error) {
+                showStatus('❌ فشل في النسخ', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function testLink() {
+            if (!window.generatedLink) {
+                showStatus('❌ لا يوجد رابط للاختبار', 'error');
+                return;
+            }
+            window.open(window.generatedLink, '_blank');
+            showStatus('🧪 تم فتح الرابط', 'info');
+        }
+
+        function generateProtection() {
+            if (!window.currentTag || !window.generatedLink) {
+                showStatus('❌ يجب توليد الرابط أولاً', 'error');
+                return;
+            }
+
+            var protectionHTML = '<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n    <meta charset="UTF-8">\n    <title>صفحة محمية - ' + window.currentTag + '</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            margin: 0;\n            padding: 20px;\n            min-height: 100vh;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        }\n        .container {\n            background: white;\n            padding: 40px;\n            border-radius: 15px;\n            text-align: center;\n            max-width: 400px;\n        }\n        .btn {\n            background: #ff9900;\n            color: white;\n            border: none;\n            padding: 15px 25px;\n            border-radius: 8px;\n            font-size: 16px;\n            cursor: pointer;\n            text-decoration: none;\n            display: inline-block;\n            margin: 10px;\n        }\n        .countdown {\n            font-size: 24px;\n            color: #667eea;\n            font-weight: bold;\n        }\n    </style>\n</head>\n<body>\n    <div class="container">\n        <h1>🛒 انتقال آمن لأمازون</h1>\n        <p>ستتم إعادة التوجيه خلال <span class="countdown" id="countdown">5</span> ثواني</p>\n        <a href="' + window.generatedLink + '" class="btn" onclick="redirect()">اذهب لأمازون الآن</a>\n        <p style="margin-top: 20px; font-size: 12px; color: #666;">🛡️ محمي لمدة 24 ساعة - Tag: ' + window.currentTag + '</p>\n    </div>\n    <script>\n        var seconds = 5;\n        var interval = setInterval(function() {\n            seconds--;\n            document.getElementById("countdown").textContent = seconds;\n            if (seconds <= 0) {\n                clearInterval(interval);\n                redirect();\n            }\n        }, 1000);\n        \n        function redirect() {\n            try {\n                var expires = new Date();\n                expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));\n                document.cookie = "amazon_affiliate=' + window.currentTag + '; expires=" + expires.toUTCString() + "; path=/";\n                localStorage.setItem("affiliate_protection", JSON.stringify({tag: "' + window.currentTag + '", expires: expires.getTime()}));\n            } catch (error) {}\n            window.location.href = "' + window.generatedLink + '";\n        }\n    </script>\n</body>\n</html>';
+
+            document.getElementById('protectionCode').textContent = protectionHTML;
+            document.getElementById('protectionSection').classList.remove('hidden');
+            showStatus('🛡️ تم إنشاء صفحة الحماية!', 'success');
+        }
+
+        function copyProtection() {
+            var code = document.getElementById('protectionCode').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(function() {
+                    showStatus('✅ تم نسخ كود الحماية!', 'success');
+                }).catch(function() {
+                    fallbackCopy(code);
+                });
+            } else {
+                fallbackCopy(code);
+            }
+        }
+
+        function downloadProtection() {
+            var code = document.getElementById('protectionCode').textContent;
+            var blob = new Blob([code], { type: 'text/html' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'protection-' + window.currentTag + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showStatus('💾 تم تحميل الملف!', 'success');
+        }
+
+        // تشغيل عند تحميل الصفحة
+        window.onload = function() {
+            showStatus('🚀 المولد جاهز للاستخدام!', 'info');
+        };
+    </script>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔗 مولد روابط الأفيليت</h1>
+            <p>مُبسط وشغال 100%</p>
+        </div>
+
+        <!-- استخراج التاج -->
+        <div class="section extract-section">
+            <h3>🔍 استخراج التاج من الرابط</h3>
+            <div class="form-group">
+                <label>الصق رابطك الكامل هنا:</label>
+                <textarea id="fullLink" rows="3" placeholder="https://www.amazon.eg/...&tag=yajnyeg-21&..."></textarea>
+            </div>
+            <button class="btn btn-success" onclick="extractTag()">🔍 استخراج التاج</button>
+        </div>
+
+        <!-- بيانات الأفيليت -->
+        <div class="section">
+            <h3>📝 بيانات الأفيليت</h3>
+            
+            <div class="form-group">
+                <label>🏷️ Affiliate Tag:</label>
+                <input type="text" id="tag" placeholder="yajnyeg-21">
+            </div>
+
+            <div class="form-group">
+                <label>🌍 نطاق أمازون:</label>
+                <select id="domain">
+                    <option value="amazon.eg">Amazon.eg (مصر)</option>
+                    <option value="amazon.com">Amazon.com</option>
+                    <option value="amazon.co.uk">Amazon.co.uk</option>
+                    <option value="amazon.ae">Amazon.ae</option>
+                    <option value="amazon.sa">Amazon.sa</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>🔗 رابط المنتج:</label>
+                <textarea id="productLink" rows="2" placeholder="https://amazon.eg/dp/B0CQS9TGSS"></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateLink()" style="width: 100%;">
+                🚀 توليد رابط الأفيليت
+            </button>
+        </div>
+
+        <!-- النتائج -->
+        <div class="section hidden" id="resultSection">
+            <h3>✅ رابط الأفيليت الجاهز</h3>
+            <div id="result" class="result-box"></div>
+            <div style="text-align: center;">
+                <button class="btn btn-success" onclick="copyLink()">📋 نسخ</button>
+                <button class="btn btn-warning" onclick="testLink()">🧪 اختبار</button>
+                <button class="btn btn-primary" onclick="generateProtection()">🛡️ إنشاء حماية</button>
+            </div>
+        </div>
+
+        <!-- صفحة الحماية -->
+        <div class="section hidden" id="protectionSection">
+            <h3>🛡️ صفحة الحماية</h3>
+            <p><strong>التعليمات:</strong> انسخ الكود أدناه واحفظه كملف .html</p>
+            <div id="protectionCode" class="code-box"></div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn btn-success" onclick="copyProtection()">📋 نسخ الكود</button>
+                <button class="btn btn-warning" onclick="downloadProtection()">💾 تحميل ملف</button>
+            </div>
+        </div>
+
+        <!-- رسائل الحالة -->
+        <div id="status"></div>
+    </div>
+</body>
+</html>
