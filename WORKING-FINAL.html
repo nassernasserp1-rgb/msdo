@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مولد روابط الأفيليت - نهائي</title>
+    <style>
+        body { font-family: Arial; background: #667eea; padding: 20px; margin: 0; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .section { background: #f5f5f5; padding: 20px; margin: 15px 0; border-radius: 8px; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #45a049; }
+        .btn-blue { background: #2196F3; }
+        .btn-orange { background: #ff9800; }
+        .result { background: #e8f5e8; padding: 15px; margin: 10px 0; border-radius: 5px; word-break: break-all; font-family: monospace; }
+        .code { background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #cce7ff; color: #004085; }
+        .hidden { display: none; }
+        h1, h2, h3 { color: #333; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <script>
+        var currentLink = '';
+        var currentTag = '';
+        var currentDomain = '';
+
+        function showMessage(text, type) {
+            var statusDiv = document.getElementById('status');
+            if (statusDiv) {
+                statusDiv.innerHTML = '<div class="status ' + type + '">' + text + '</div>';
+                setTimeout(function() {
+                    statusDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        function extractTag() {
+            var fullLink = document.getElementById('fullLink').value.trim();
+            if (!fullLink) {
+                showMessage('❌ يرجى إدخال الرابط أولاً', 'error');
+                return;
+            }
+
+            try {
+                var tagMatch = fullLink.match(/[?&]tag=([^&]+)/);
+                if (tagMatch && tagMatch[1]) {
+                    var tag = tagMatch[1];
+                    document.getElementById('tag').value = tag;
+                    showMessage('✅ تم استخراج التاج: ' + tag, 'success');
+                    
+                    var url = new URL(fullLink.indexOf('http') === 0 ? fullLink : 'https://' + fullLink);
+                    var basicPath = url.pathname.match(/\/dp\/[A-Z0-9]+/);
+                    if (basicPath) {
+                        var basicLink = 'https://' + url.hostname + basicPath[0];
+                        document.getElementById('productLink').value = basicLink;
+                        showMessage('✅ تم استخراج الرابط الأساسي أيضاً', 'success');
+                    }
+                } else {
+                    showMessage('❌ لم يتم العثور على التاج في الرابط', 'error');
+                }
+            } catch (error) {
+                showMessage('❌ خطأ في معالجة الرابط', 'error');
+            }
+        }
+
+        function generateLink() {
+            var tag = document.getElementById('tag').value.trim();
+            var domain = document.getElementById('domain').value;
+            var productLink = document.getElementById('productLink').value.trim();
+
+            if (!tag) {
+                showMessage('❌ يرجى إدخال التاج', 'error');
+                return;
+            }
+
+            if (!productLink) {
+                showMessage('❌ يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+
+            try {
+                var cleanLink = productLink.indexOf('http') === 0 ? productLink : 'https://' + productLink;
+                var url = new URL(cleanLink);
+                
+                if (url.hostname.indexOf('amazon') === -1) {
+                    showMessage('❌ الرابط يجب أن يكون من أمازون', 'error');
+                    return;
+                }
+
+                url.hostname = domain;
+                url.search = '';
+                
+                var params = new URLSearchParams();
+                params.set('tag', tag);
+                params.set('linkCode', 'as2');
+                params.set('camp', '247');
+                params.set('creative', '1211');
+                params.set('ascsubtag', 'gen_' + Date.now());
+
+                url.search = params.toString();
+
+                currentLink = url.toString();
+                currentTag = tag;
+                currentDomain = domain;
+
+                document.getElementById('result').textContent = currentLink;
+                document.getElementById('resultSection').classList.remove('hidden');
+                
+                showMessage('✅ تم توليد الرابط بنجاح!', 'success');
+
+            } catch (error) {
+                showMessage('❌ خطأ في التوليد: ' + error.message, 'error');
+            }
+        }
+
+        function copyLink() {
+            if (!currentLink) {
+                showMessage('❌ لا يوجد رابط للنسخ', 'error');
+                return;
+            }
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(currentLink).then(function() {
+                    showMessage('✅ تم نسخ الرابط!', 'success');
+                }).catch(function() {
+                    fallbackCopy(currentLink);
+                });
+            } else {
+                fallbackCopy(currentLink);
+            }
+        }
+
+        function fallbackCopy(text) {
+            var textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showMessage('✅ تم نسخ الرابط!', 'success');
+            } catch (error) {
+                showMessage('❌ فشل في النسخ', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function testLink() {
+            if (!currentLink) {
+                showMessage('❌ لا يوجد رابط للاختبار', 'error');
+                return;
+            }
+            window.open(currentLink, '_blank');
+            showMessage('🧪 تم فتح الرابط', 'info');
+        }
+
+        function generateProtection() {
+            if (!currentTag || !currentLink) {
+                showMessage('❌ يجب توليد الرابط أولاً', 'error');
+                return;
+            }
+
+            var html = '<!DOCTYPE html>\\n<html lang="ar" dir="rtl">\\n<head>\\n    <meta charset="UTF-8">\\n    <title>صفحة محمية - ' + currentTag + '</title>\\n    <style>\\n        body { font-family: Arial; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }\\n        .container { background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 400px; }\\n        .btn { background: #ff9900; color: white; border: none; padding: 15px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-block; margin: 10px; }\\n        .countdown { font-size: 24px; color: #667eea; font-weight: bold; }\\n    </style>\\n</head>\\n<body>\\n    <div class="container">\\n        <h1>🛒 انتقال آمن لأمازون</h1>\\n        <p>ستتم إعادة التوجيه خلال <span class="countdown" id="countdown">5</span> ثواني</p>\\n        <a href="' + currentLink + '" class="btn" onclick="redirect()">اذهب لأمازون الآن</a>\\n        <p style="margin-top: 20px; font-size: 12px; color: #666;">🛡️ محمي لمدة 24 ساعة - Tag: ' + currentTag + '</p>\\n    </div>\\n    <script>\\n        var seconds = 5;\\n        var interval = setInterval(function() {\\n            seconds--;\\n            document.getElementById(\\"countdown\\").textContent = seconds;\\n            if (seconds <= 0) {\\n                clearInterval(interval);\\n                redirect();\\n            }\\n        }, 1000);\\n        \\n        function redirect() {\\n            try {\\n                var expires = new Date();\\n                expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));\\n                document.cookie = \\"amazon_affiliate=' + currentTag + '; expires=\\" + expires.toUTCString() + \\"; path=/\\";\\n                localStorage.setItem(\\"affiliate_protection\\", JSON.stringify({tag: \\"' + currentTag + '\\", expires: expires.getTime()}));\\n            } catch (error) {}\\n            window.location.href = \\"' + currentLink + '\\";\\n        }\\n    </script>\\n</body>\\n</html>';
+
+            document.getElementById('protectionCode').textContent = html;
+            document.getElementById('protectionSection').classList.remove('hidden');
+            showMessage('🛡️ تم إنشاء صفحة الحماية!', 'success');
+        }
+
+        function copyProtection() {
+            var code = document.getElementById('protectionCode').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(function() {
+                    showMessage('✅ تم نسخ كود الحماية!', 'success');
+                }).catch(function() {
+                    fallbackCopy(code);
+                });
+            } else {
+                fallbackCopy(code);
+            }
+        }
+
+        function downloadProtection() {
+            var code = document.getElementById('protectionCode').textContent;
+            var blob = new Blob([code], { type: 'text/html' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'protection-' + currentTag + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('💾 تم تحميل الملف!', 'success');
+        }
+    </script>
+
+    <div class="container">
+        <h1>🔗 مولد روابط الأفيليت</h1>
+        <p style="text-align: center; color: #666; font-size: 18px; font-weight: bold;">✅ النسخة النهائية</p>
+
+        <div class="section" style="background: #e8f5e8; border: 2px solid #4CAF50;">
+            <h3>🔍 استخراج التاج من الرابط</h3>
+            <textarea id="fullLink" rows="3" placeholder="الصق رابطك الكامل هنا...">https://www.amazon.eg/-/en/Snips-Cremix-Cappuccino-Frothier-Capacity/dp/B0B88Z3QSW/ref=sr_1_1425?dib=eyJ2IjoiMSJ9.AsCSBqlI2kIVt5MXp9nelKy6bPWMaduQvOrT5Ki-mGfmYBJ0aNl6Ybf2r9jtPsU3-ARoHhBtjMYoj6Nv_TSjekNyDnHAMEyhjMBdpi4W0ubraGeL6x6LMTTfLCYXXNKOpeobmxRdi1KrJwt-sLpqO0Wpa8u4PxSxBoFXajOFZ_JTszkdxvr3GTd60o7gFoMuldr3Pky3gsgYl903PLXKrecXxBAtp8ylw6B6igVwnNM.qqT3GKC_vE2s0pcqMcRuHwNX1xoDOULjk7hNlq15g-4&dib_tag=se&m=A1ZVRGNO5AYLOV&qid=1756176800&refinements=p_98%3A21909049031&rps=1&s=home&sr=1-1425&&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57695541</textarea>
+            <button class="btn" onclick="extractTag()">🔍 استخراج التاج</button>
+        </div>
+
+        <div class="section">
+            <h3>📝 بيانات الأفيليت</h3>
+            <label>🏷️ Affiliate Tag:</label>
+            <input type="text" id="tag" placeholder="yajnyeg-21">
+            
+            <label>🌍 نطاق أمازون:</label>
+            <select id="domain">
+                <option value="amazon.eg">Amazon.eg (مصر)</option>
+                <option value="amazon.com">Amazon.com</option>
+                <option value="amazon.ae">Amazon.ae</option>
+                <option value="amazon.sa">Amazon.sa</option>
+            </select>
+            
+            <label>🔗 رابط المنتج:</label>
+            <textarea id="productLink" rows="2" placeholder="https://amazon.eg/dp/B0CQS9TGSS"></textarea>
+            
+            <button class="btn btn-blue" onclick="generateLink()" style="width: 100%; font-size: 16px;">
+                🚀 توليد رابط الأفيليت
+            </button>
+        </div>
+
+        <div class="section hidden" id="resultSection">
+            <h3>✅ رابط الأفيليت الجاهز</h3>
+            <div id="result" class="result"></div>
+            <div style="text-align: center;">
+                <button class="btn" onclick="copyLink()">📋 نسخ</button>
+                <button class="btn btn-orange" onclick="testLink()">🧪 اختبار</button>
+                <button class="btn btn-blue" onclick="generateProtection()">🛡️ إنشاء حماية</button>
+            </div>
+        </div>
+
+        <div class="section hidden" id="protectionSection">
+            <h3>🛡️ صفحة الحماية</h3>
+            <p><strong>انسخ الكود أدناه واحفظه كملف .html</strong></p>
+            <div id="protectionCode" class="code"></div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn" onclick="copyProtection()">📋 نسخ الكود</button>
+                <button class="btn btn-orange" onclick="downloadProtection()">💾 تحميل ملف</button>
+            </div>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showMessage('🚀 المولد جاهز للاستخدام!', 'info');
+        });
+    </script>
+</body>
+</html>

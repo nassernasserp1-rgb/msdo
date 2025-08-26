@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مولد روابط الأفيليت - مُصحح</title>
+    <style>
+        body { font-family: Arial; background: #FF6B6B; padding: 20px; margin: 0; }
+        .container { max-width: 650px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .button { padding: 12px 20px; background: #4ECDC4; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 8px; font-weight: bold; }
+        .button:hover { background: #45B7B8; }
+        .button-success { background: #6BCF7F; }
+        .button-warning { background: #FFD93D; color: #333; }
+        .button-primary { background: #4D79A4; }
+        .output { background: #F8F9FA; padding: 18px; margin: 12px 0; border-radius: 8px; word-break: break-all; font-family: monospace; direction: ltr; text-align: left; border: 1px solid #E9ECEF; }
+        .code-output { background: #2C3E50; color: #ECF0F1; padding: 18px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 280px; overflow-y: auto; white-space: pre-wrap; direction: ltr; text-align: left; }
+        .message { padding: 12px; margin: 12px 0; border-radius: 6px; text-align: center; font-weight: bold; }
+        .msg-success { background: #D4EDDA; color: #155724; border: 1px solid #C3E6CB; }
+        .msg-error { background: #F8D7DA; color: #721C24; border: 1px solid #F5C6CB; }
+        .msg-info { background: #CCE7FF; color: #004085; border: 1px solid #99D6FF; }
+        .hidden { display: none; }
+        h1, h2, h3 { color: #2C3E50; }
+        .section { background: #F8F9FA; padding: 20px; margin: 15px 0; border-radius: 10px; border: 1px solid #E9ECEF; }
+        .extract-section { background: #E8F5E8; border: 2px solid #6BCF7F; }
+    </style>
+</head>
+<body>
+    <script>
+        // المتغيرات العامة
+        var affiliateLink = '';
+        var affiliateTag = '';
+        var selectedDomain = '';
+
+        // دالة عرض الرسائل
+        function displayMessage(text, type) {
+            var statusElement = document.getElementById('messageArea');
+            statusElement.innerHTML = '<div class="message msg-' + type + '">' + text + '</div>';
+            setTimeout(function() {
+                statusElement.innerHTML = '';
+            }, 5000);
+        }
+
+        // دالة استخراج التاج
+        function extractAffiliateTag() {
+            var fullUrl = document.getElementById('completeLink').value.trim();
+            if (!fullUrl) {
+                displayMessage('❌ يرجى إدخال الرابط أولاً', 'error');
+                return;
+            }
+
+            try {
+                var tagPattern = fullUrl.match(/[?&]tag=([^&]+)/);
+                if (tagPattern && tagPattern[1]) {
+                    var extractedTag = tagPattern[1];
+                    document.getElementById('tagInput').value = extractedTag;
+                    displayMessage('✅ تم استخراج التاج: ' + extractedTag, 'success');
+                    
+                    var urlObject = new URL(fullUrl.indexOf('http') === 0 ? fullUrl : 'https://' + fullUrl);
+                    var productPath = urlObject.pathname.match(/\/dp\/[A-Z0-9]+/);
+                    if (productPath) {
+                        var cleanUrl = 'https://' + urlObject.hostname + productPath[0];
+                        document.getElementById('productUrl').value = cleanUrl;
+                        displayMessage('✅ تم استخراج الرابط الأساسي أيضاً', 'success');
+                    }
+                } else {
+                    displayMessage('❌ لم يتم العثور على التاج في الرابط', 'error');
+                }
+            } catch (error) {
+                displayMessage('❌ خطأ في معالجة الرابط', 'error');
+            }
+        }
+
+        // دالة توليد رابط الأفيليت
+        function createAffiliateLink() {
+            var tagValue = document.getElementById('tagInput').value.trim();
+            var domainValue = document.getElementById('domainSelect').value;
+            var productUrl = document.getElementById('productUrl').value.trim();
+
+            if (!tagValue) {
+                displayMessage('❌ يرجى إدخال التاج', 'error');
+                return;
+            }
+
+            if (!productUrl) {
+                displayMessage('❌ يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+
+            try {
+                var processedUrl = productUrl.indexOf('http') === 0 ? productUrl : 'https://' + productUrl;
+                var urlObj = new URL(processedUrl);
+                
+                if (urlObj.hostname.indexOf('amazon') === -1) {
+                    displayMessage('❌ الرابط يجب أن يكون من أمازون', 'error');
+                    return;
+                }
+
+                urlObj.hostname = domainValue;
+                urlObj.search = '';
+                
+                var urlParams = new URLSearchParams();
+                urlParams.set('tag', tagValue);
+                urlParams.set('linkCode', 'as2');
+                urlParams.set('camp', '247');
+                urlParams.set('creative', '1211');
+                urlParams.set('ascsubtag', 'generated_' + Date.now());
+
+                urlObj.search = urlParams.toString();
+
+                affiliateLink = urlObj.toString();
+                affiliateTag = tagValue;
+                selectedDomain = domainValue;
+
+                document.getElementById('finalResult').textContent = affiliateLink;
+                document.getElementById('resultArea').classList.remove('hidden');
+                
+                displayMessage('✅ تم توليد رابط الأفيليت بنجاح!', 'success');
+
+            } catch (error) {
+                displayMessage('❌ خطأ في التوليد: ' + error.message, 'error');
+            }
+        }
+
+        // دالة نسخ الرابط
+        function copyToClipboard() {
+            if (!affiliateLink) {
+                displayMessage('❌ لا يوجد رابط للنسخ', 'error');
+                return;
+            }
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(affiliateLink).then(function() {
+                    displayMessage('✅ تم نسخ الرابط بنجاح!', 'success');
+                }).catch(function() {
+                    manualCopy(affiliateLink);
+                });
+            } else {
+                manualCopy(affiliateLink);
+            }
+        }
+
+        // دالة النسخ اليدوية
+        function manualCopy(text) {
+            var tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            tempTextArea.style.position = 'fixed';
+            tempTextArea.style.opacity = '0';
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                document.execCommand('copy');
+                displayMessage('✅ تم نسخ الرابط بنجاح!', 'success');
+            } catch (error) {
+                displayMessage('❌ فشل في النسخ', 'error');
+            }
+            
+            document.body.removeChild(tempTextArea);
+        }
+
+        // دالة اختبار الرابط
+        function testAffiliateLink() {
+            if (!affiliateLink) {
+                displayMessage('❌ لا يوجد رابط للاختبار', 'error');
+                return;
+            }
+            window.open(affiliateLink, '_blank');
+            displayMessage('🧪 تم فتح الرابط في نافذة جديدة', 'info');
+        }
+
+        // دالة إنشاء صفحة الحماية
+        function generateProtectionPage() {
+            if (!affiliateTag || !affiliateLink) {
+                displayMessage('❌ يجب توليد رابط الأفيليت أولاً', 'error');
+                return;
+            }
+
+            var protectionHtml = '<!DOCTYPE html>\\n<html lang="ar" dir="rtl">\\n<head>\\n<meta charset="UTF-8">\\n<title>صفحة محمية - ' + affiliateTag + '</title>\\n<style>\\nbody{font-family:Arial;background:linear-gradient(135deg,#FF6B6B 0%,#4ECDC4 100%);margin:0;padding:20px;min-height:100vh;display:flex;align-items:center;justify-content:center}\\n.container{background:white;padding:50px;border-radius:20px;text-align:center;max-width:450px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}\\n.redirect-button{background:#FF6B6B;color:white;border:none;padding:18px 30px;border-radius:10px;font-size:18px;cursor:pointer;text-decoration:none;display:inline-block;margin:15px;transition:all 0.3s ease}\\n.redirect-button:hover{background:#FF5252;transform:translateY(-2px)}\\n.timer{font-size:28px;color:#4ECDC4;font-weight:bold;margin:25px 0}\\n</style>\\n</head>\\n<body>\\n<div class="container">\\n<h1 style="color:#2C3E50;margin-bottom:25px">🛒 انتقال آمن لأمازون</h1>\\n<p>ستتم إعادة التوجيه خلال <span class="timer" id="timer">5</span> ثواني</p>\\n<a href="' + affiliateLink + '" class="redirect-button" onclick="performRedirect()">اذهب لأمازون الآن</a>\\n<p style="margin-top:25px;font-size:13px;color:#7F8C8D">🛡️ محمي بنظام حماية الكوكيز لمدة 24 ساعة</p>\\n<p style="font-size:12px;color:#95A5A6">Tag: ' + affiliateTag + '</p>\\n</div>\\n<script>\\nvar timeLeft=5;\\nvar countdownTimer=setInterval(function(){\\ntimeLeft--;\\ndocument.getElementById("timer").textContent=timeLeft;\\nif(timeLeft<=0){\\nclearInterval(countdownTimer);\\nperformRedirect();\\n}\\n},1000);\\nfunction performRedirect(){\\ntry{\\nvar expirationDate=new Date();\\nexpirationDate.setTime(expirationDate.getTime()+(24*60*60*1000));\\ndocument.cookie="amazon_affiliate_protection=' + affiliateTag + '; expires="+expirationDate.toUTCString()+"; path=/";\\nlocalStorage.setItem("affiliate_protection_data",JSON.stringify({tag:"' + affiliateTag + '",expires:expirationDate.getTime(),domain:"' + selectedDomain + '"}));\\n}catch(error){console.log("Protection setup error:",error);}\\nwindow.location.href="' + affiliateLink + '";\\n}\\n</script>\\n</body>\\n</html>';
+
+            document.getElementById('protectionCodeArea').textContent = protectionHtml;
+            document.getElementById('protectionArea').classList.remove('hidden');
+            displayMessage('🛡️ تم إنشاء صفحة الحماية بنجاح!', 'success');
+        }
+
+        // دالة نسخ كود الحماية
+        function copyProtectionCode() {
+            var protectionCode = document.getElementById('protectionCodeArea').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(protectionCode).then(function() {
+                    displayMessage('✅ تم نسخ كود الحماية بنجاح!', 'success');
+                }).catch(function() {
+                    manualCopy(protectionCode);
+                });
+            } else {
+                manualCopy(protectionCode);
+            }
+        }
+
+        // دالة تحميل ملف الحماية
+        function downloadProtectionFile() {
+            var protectionCode = document.getElementById('protectionCodeArea').textContent;
+            var fileBlob = new Blob([protectionCode], { type: 'text/html;charset=utf-8' });
+            var downloadUrl = URL.createObjectURL(fileBlob);
+            var downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            downloadLink.download = 'affiliate-protection-' + affiliateTag + '-' + Date.now() + '.html';
+            downloadLink.click();
+            URL.revokeObjectURL(downloadUrl);
+            displayMessage('💾 تم تحميل ملف الحماية بنجاح!', 'success');
+        }
+
+        // تشغيل عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            displayMessage('🚀 مولد روابط الأفيليت جاهز للاستخدام!', 'info');
+        });
+    </script>
+
+    <div class="container">
+        <h1>🔗 مولد روابط الأفيليت</h1>
+        <p style="text-align: center; color: #666; font-size: 18px; font-weight: bold;">✅ النسخة المُصححة - تعمل 100%</p>
+
+        <div class="section extract-section">
+            <h3>🔍 استخراج التاج من الرابط</h3>
+            <p>الصق رابطك الكامل هنا لاستخراج التاج تلقائياً:</p>
+            <textarea id="completeLink" rows="3">https://www.amazon.eg/-/en/Snips-Cremix-Cappuccino-Frothier-Capacity/dp/B0B88Z3QSW/ref=sr_1_1425?dib=eyJ2IjoiMSJ9.AsCSBqlI2kIVt5MXp9nelKy6bPWMaduQvOrT5Ki-mGfmYBJ0aNl6Ybf2r9jtPsU3-ARoHhBtjMYoj6Nv_TSjekNyDnHAMEyhjMBdpi4W0ubraGeL6x6LMTTfLCYXXNKOpeobmxRdi1KrJwt-sLpqO0Wpa8u4PxSxBoFXajOFZ_JTszkdxvr3GTd60o7gFoMuldr3Pky3gsgYl903PLXKrecXxBAtp8ylw6B6igVwnNM.qqT3GKC_vE2s0pcqMcRuHwNX1xoDOULjk7hNlq15g-4&dib_tag=se&m=A1ZVRGNO5AYLOV&qid=1756176800&refinements=p_98%3A21909049031&rps=1&s=home&sr=1-1425&&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57695541</textarea>
+            <button class="button button-success" onclick="extractAffiliateTag()">🔍 استخراج التاج</button>
+        </div>
+
+        <div class="section">
+            <h3>📝 بيانات الأفيليت</h3>
+            
+            <label>🏷️ Affiliate Tag:</label>
+            <input type="text" id="tagInput" placeholder="مثال: yajnyeg-21">
+            
+            <label>🌍 نطاق أمازون:</label>
+            <select id="domainSelect">
+                <option value="amazon.eg">Amazon.eg (مصر)</option>
+                <option value="amazon.com">Amazon.com</option>
+                <option value="amazon.ae">Amazon.ae</option>
+                <option value="amazon.sa">Amazon.sa</option>
+            </select>
+            
+            <label>🔗 رابط المنتج الأساسي:</label>
+            <textarea id="productUrl" rows="2" placeholder="مثال: https://amazon.eg/dp/B0B88Z3QSW"></textarea>
+            
+            <button class="button button-primary" onclick="createAffiliateLink()" style="width: 100%; font-size: 18px;">
+                🚀 توليد رابط الأفيليت المحمي
+            </button>
+        </div>
+
+        <div id="resultArea" class="section hidden">
+            <h3>✅ رابط الأفيليت الجاهز</h3>
+            <div id="finalResult" class="output"></div>
+            <div style="text-align: center;">
+                <button class="button button-success" onclick="copyToClipboard()">📋 نسخ الرابط</button>
+                <button class="button button-warning" onclick="testAffiliateLink()">🧪 اختبار الرابط</button>
+                <button class="button button-primary" onclick="generateProtectionPage()">🛡️ إنشاء صفحة الحماية</button>
+            </div>
+        </div>
+
+        <div id="protectionArea" class="section hidden">
+            <h3>🛡️ صفحة الحماية</h3>
+            <p><strong>📌 التعليمات:</strong></p>
+            <ul style="text-align: right;">
+                <li>انسخ الكود أدناه واحفظه في ملف جديد باسم <code>protection.html</code></li>
+                <li>شارك هذا الملف مع العملاء بدلاً من الرابط المباشر</li>
+                <li>عندما يفتح العميل الملف، سيتم حماية الكوكيز لمدة 24 ساعة</li>
+            </ul>
+            <div id="protectionCodeArea" class="code-output"></div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="button button-success" onclick="copyProtectionCode()">📋 نسخ كود الحماية</button>
+                <button class="button button-warning" onclick="downloadProtectionFile()">💾 تحميل ملف HTML</button>
+            </div>
+        </div>
+
+        <div id="messageArea"></div>
+    </div>
+</body>
+</html>

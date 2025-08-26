@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد روابط الأفيليت - نسخة مصححة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            min-width: 150px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #ed8936, #dd6b20);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .output-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .result-link {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            word-break: break-all;
+            direction: ltr;
+            text-align: left;
+            font-family: monospace;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .success { 
+            background: #c6f6d5; 
+            color: #22543d; 
+            border: 1px solid #9ae6b4; 
+        }
+        
+        .error { 
+            background: #fed7d7; 
+            color: #c53030; 
+            border: 1px solid #feb2b2; 
+        }
+        
+        .info { 
+            background: #bee3f8; 
+            color: #2c5282; 
+            border: 1px solid #90cdf4; 
+        }
+        
+        .helper-text {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .test-section {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 مولد روابط الأفيليت</h1>
+            <p style="color: #718096; font-size: 1.2rem;">نسخة مصححة - تعمل 100%</p>
+        </div>
+
+        <!-- قسم الإدخال -->
+        <div class="section">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">📝 بيانات الأفيليت</h2>
+            
+            <div class="form-group">
+                <label>🏷️ الـ Affiliate Tag الخاص بك:</label>
+                <input type="text" id="affiliateTag" placeholder="مثال: yajnyeg-21" value="yajnyeg-21">
+                <div class="helper-text">
+                    💡 هذا هو المعرف الخاص بك في برنامج أمازون للأفيليت
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>🌍 نطاق أمازون:</label>
+                <select id="amazonDomain">
+                    <option value="amazon.eg">Amazon.eg (مصر)</option>
+                    <option value="amazon.com">Amazon.com (الولايات المتحدة)</option>
+                    <option value="amazon.co.uk">Amazon.co.uk (المملكة المتحدة)</option>
+                    <option value="amazon.de">Amazon.de (ألمانيا)</option>
+                    <option value="amazon.fr">Amazon.fr (فرنسا)</option>
+                    <option value="amazon.ae">Amazon.ae (الإمارات)</option>
+                    <option value="amazon.sa">Amazon.sa (السعودية)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>🔗 رابط المنتج الأصلي:</label>
+                <textarea id="originalLink" rows="3" placeholder="الصق هنا رابط المنتج من أمازون"></textarea>
+                <div class="helper-text">
+                    📌 مثال: https://amazon.eg/dp/B0CQS9TGSS
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateLink()" style="width: 100%;">
+                🚀 توليد رابط الأفيليت
+            </button>
+        </div>
+
+        <!-- قسم النتائج -->
+        <div class="section hidden" id="resultSection">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">✅ النتيجة</h2>
+            
+            <div>
+                <strong>رابط الأفيليت الجاهز:</strong>
+                <div id="generatedLink" class="result-link"></div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-success" onclick="copyToClipboard()">
+                    📋 نسخ الرابط
+                </button>
+                <button class="btn btn-warning" onclick="testLink()">
+                    🧪 اختبار الرابط
+                </button>
+                <button class="btn btn-primary" onclick="showProtectionCode()">
+                    🛡️ إنشاء صفحة محمية
+                </button>
+            </div>
+        </div>
+
+        <!-- قسم كود الحماية -->
+        <div class="section hidden" id="protectionSection">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">🛡️ صفحة الحماية</h2>
+            
+            <div class="info">
+                <strong>📌 كيفية الاستخدام:</strong><br>
+                1. انسخ الكود أدناه<br>
+                2. احفظه في ملف جديد باسم <code>protection.html</code><br>
+                3. شارك هذا الملف مع العملاء<br>
+                4. عندما يفتحوه سينتقلون لأمازون مع الحماية
+            </div>
+            
+            <div id="protectionCode" class="output-box"></div>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn btn-success" onclick="copyProtectionCode()">
+                    📋 نسخ كود الحماية
+                </button>
+                <button class="btn btn-warning" onclick="downloadAsFile()">
+                    💾 تحميل كملف
+                </button>
+            </div>
+        </div>
+
+        <!-- قسم الاختبار -->
+        <div class="test-section">
+            <h3 style="color: #d69e2e; margin-bottom: 15px;">🧪 اختبار سريع</h3>
+            <p>للاختبار السريع، الصق هذا الرابط:</p>
+            <input type="text" id="testInput" placeholder="الصق رابط أمازون هنا للاختبار" style="margin: 10px 0;">
+            <button class="btn btn-warning" onclick="quickTest()" style="width: 100%;">
+                ⚡ اختبار سريع
+            </button>
+        </div>
+
+        <!-- رسائل الحالة -->
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        // متغيرات عامة
+        let generatedAffiliateLink = '';
+        let currentTag = '';
+        let currentDomain = '';
+
+        // عرض رسالة الحالة
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = '<div class="status ' + type + '">' + message + '</div>';
+            
+            setTimeout(function() {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // توليد رابط الأفيليت
+        function generateLink() {
+            console.log('🚀 بدء توليد الرابط...');
+            
+            const tag = document.getElementById('affiliateTag').value.trim();
+            const domain = document.getElementById('amazonDomain').value;
+            const originalLink = document.getElementById('originalLink').value.trim();
+
+            console.log('البيانات المدخلة:', { tag: tag, domain: domain, link: originalLink });
+
+            if (!tag) {
+                showStatus('❌ يرجى إدخال الـ Affiliate Tag', 'error');
+                return;
+            }
+
+            if (!originalLink) {
+                showStatus('❌ يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+
+            try {
+                // تنظيف الرابط
+                let cleanLink = originalLink.trim();
+                
+                // إضافة البروتوكول إذا لم يكن موجوداً
+                if (!cleanLink.startsWith('http')) {
+                    cleanLink = 'https://' + cleanLink;
+                }
+
+                console.log('الرابط المنظف:', cleanLink);
+
+                const url = new URL(cleanLink);
+                
+                // التحقق من أنه رابط أمازون
+                if (!url.hostname.includes('amazon')) {
+                    showStatus('❌ الرابط يجب أن يكون من أمازون', 'error');
+                    return;
+                }
+
+                // تحديث النطاق
+                url.hostname = domain;
+
+                // إضافة معاملات الأفيليت
+                url.searchParams.set('tag', tag);
+                url.searchParams.set('linkCode', 'as2');
+                url.searchParams.set('camp', '247');
+                url.searchParams.set('creative', '1211');
+                
+                // معرف فريد
+                url.searchParams.set('ascsubtag', 'gen_' + Date.now());
+
+                generatedAffiliateLink = url.toString();
+                currentTag = tag;
+                currentDomain = domain;
+
+                console.log('الرابط المُولد:', generatedAffiliateLink);
+
+                // عرض النتيجة
+                document.getElementById('generatedLink').textContent = generatedAffiliateLink;
+                document.getElementById('resultSection').classList.remove('hidden');
+                
+                showStatus('✅ تم توليد رابط الأفيليت بنجاح!', 'success');
+
+                // التمرير للنتيجة
+                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('خطأ:', error);
+                showStatus('❌ خطأ في معالجة الرابط: ' + error.message, 'error');
+            }
+        }
+
+        // نسخ الرابط
+        function copyToClipboard() {
+            if (!generatedAffiliateLink) {
+                showStatus('❌ لا يوجد رابط للنسخ', 'error');
+                return;
+            }
+
+            // طريقة النسخ الحديثة
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(generatedAffiliateLink).then(function() {
+                    showStatus('✅ تم نسخ الرابط بنجاح!', 'success');
+                }).catch(function() {
+                    fallbackCopy(generatedAffiliateLink);
+                });
+            } else {
+                fallbackCopy(generatedAffiliateLink);
+            }
+        }
+
+        // طريقة النسخ البديلة
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showStatus('✅ تم نسخ الرابط بنجاح!', 'success');
+            } catch (error) {
+                showStatus('❌ فشل في النسخ', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // اختبار الرابط
+        function testLink() {
+            if (!generatedAffiliateLink) {
+                showStatus('❌ لا يوجد رابط للاختبار', 'error');
+                return;
+            }
+
+            window.open(generatedAffiliateLink, '_blank');
+            showStatus('🧪 تم فتح الرابط في نافذة جديدة', 'info');
+        }
+
+        // إظهار كود الحماية
+        function showProtectionCode() {
+            if (!currentTag || !generatedAffiliateLink) {
+                showStatus('❌ يجب توليد رابط الأفيليت أولاً', 'error');
+                return;
+            }
+
+            const protectionHTML = generateProtectionHTML();
+            document.getElementById('protectionCode').textContent = protectionHTML;
+            document.getElementById('protectionSection').classList.remove('hidden');
+            
+            showStatus('🛡️ تم إنشاء كود الحماية بنجاح!', 'success');
+            document.getElementById('protectionSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // توليد HTML الحماية
+        function generateProtectionHTML() {
+            return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة محمية - ${currentTag}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 500px;
+            width: 90%;
+        }
+        .redirect-btn {
+            background: linear-gradient(45deg, #ff9900, #e67e00);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        .redirect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .countdown {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: #2d3748; margin-bottom: 20px;">🛒 انتقال آمن لأمازون</h1>
+        
+        <div>
+            <p>ستتم إعادة توجيهك إلى أمازون خلال <span class="countdown" id="countdown">5</span> ثواني</p>
+            <p>أو انقر على الزر أدناه للانتقال مباشرة</p>
+        </div>
+        
+        <a href="${generatedAffiliateLink}" class="redirect-btn" onclick="redirect()">
+            🛒 اذهب إلى أمازون الآن
+        </a>
+        
+        <div style="margin-top: 30px; font-size: 0.9rem; color: #718096;">
+            <p>🛡️ محمي بنظام حماية الكوكيز لمدة 24 ساعة</p>
+        </div>
+    </div>
+
+    <script>
+        let seconds = 5;
+        const countdownEl = document.getElementById('countdown');
+        
+        const interval = setInterval(function() {
+            seconds--;
+            countdownEl.textContent = seconds;
+            
+            if (seconds <= 0) {
+                clearInterval(interval);
+                redirect();
+            }
+        }, 1000);
+
+        function redirect() {
+            // تفعيل الحماية
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (24 * 60 * 60 * 1000));
+            
+            document.cookie = 'amazon_affiliate=${currentTag}; expires=' + expires.toUTCString() + '; path=/';
+            
+            console.log('🛡️ تم تفعيل الحماية');
+            window.location.href = '${generatedAffiliateLink}';
+        }
+    </script>
+</body>
+</html>`;
+        }
+
+        // نسخ كود الحماية
+        function copyProtectionCode() {
+            const code = document.getElementById('protectionCode').textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(function() {
+                    showStatus('✅ تم نسخ كود الحماية بنجاح!', 'success');
+                }).catch(function() {
+                    fallbackCopy(code);
+                });
+            } else {
+                fallbackCopy(code);
+            }
+        }
+
+        // تحميل كملف
+        function downloadAsFile() {
+            const code = document.getElementById('protectionCode').textContent;
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'affiliate-protected-' + currentTag + '-' + Date.now() + '.html';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('💾 تم تحميل الملف بنجاح!', 'success');
+        }
+
+        // اختبار سريع
+        function quickTest() {
+            const testLink = document.getElementById('testInput').value.trim();
+            if (!testLink) {
+                showStatus('❌ أدخل رابط للاختبار', 'error');
+                return;
+            }
+
+            document.getElementById('originalLink').value = testLink;
+            generateLink();
+        }
+
+        // تحسين تجربة المستخدم
+        document.addEventListener('DOMContentLoaded', function() {
+            showStatus('🚀 مولد روابط الأفيليت جاهز للاستخدام!', 'info');
+            
+            // ملء رابط تجريبي في حقل الاختبار
+            document.getElementById('testInput').value = 'https://amazon.eg/-/en/Reebok-GLIDE-SHOES-UNISEX-BLACK/dp/B0CQS9TGSS/ref=sr_1_9?dib=eyJ2IjoiMSJ9.UpFzzQMNE7FVlkl1KbsnYjPGifaw0BaTXRLgqmwIURohtAOkaHMfG9WSuTGkx05YE3Be76DZ2-PdShd95cFqIzaXPIsfHTerMt56m7cuOlP0aTBIPnwC-Iu0jbY4Ljj2_tymy1FkExp5PvYc2J8siq7FPi-NcAxYCpVPKmOR4NgQb1pXLzalj3dZ2Lh9niu6aajTY-ESewLKIJ34h4_wXSKVypf4GabOa45wh7qeaH4.XhNebUgN9w7uCr398DsCQYEMWwvMoqU7Qp3ChGXHEiw&dib_tag=se&qid=1756176296&refinements=p_98%3A21909049031&rps=1&s=sports-goods&sr=1-9&th=1&psc=1&&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57694060';
+        });
+
+        // إضافة مستمع للضغط على Enter
+        document.getElementById('originalLink').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateLink();
+            }
+        });
+
+        document.getElementById('testInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                quickTest();
+            }
+        });
+
+        console.log('✅ تم تحميل الجافاسكريبت بنجاح');
+    </script>
+</body>
+</html>

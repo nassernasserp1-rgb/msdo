@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار نظام حماية كوكيز الأفيليت</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .amazon-link {
+            display: inline-block;
+            background: #ff9900;
+            color: white;
+            padding: 15px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .amazon-link:hover {
+            background: #e67e00;
+            transform: translateY(-2px);
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .test-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+        
+        .test-button:hover {
+            background: #218838;
+        }
+        
+        .danger-button {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .danger-button:hover {
+            background: #c82333;
+        }
+        
+        #testResults {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ اختبار نظام حماية كوكيز الأفيليت</h1>
+        
+        <div class="info-box">
+            <h3>🔍 ماذا سيحدث:</h3>
+            <ol>
+                <li>ستظهر نافذة موافقة الكوكيز</li>
+                <li>بعد الموافقة، ستبدأ الحماية وستظهر علامة "حماية نشطة"</li>
+                <li>يمكنك اختبار محاولة تغيير أو حذف الكوكيز</li>
+                <li>سيقوم النظام بإعادة تعيين الكوكيز تلقائياً</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <h3>📱 روابط أمازون للاختبار:</h3>
+            <p>هذه الروابط سيتم تحديثها تلقائياً لتحتوي على الـ tag الخاص بك:</p>
+            
+            <a href="https://amazon.eg/dp/B0CQS9TGSS" class="amazon-link" target="_blank">
+                🟠 منتج على أمازون مصر
+            </a>
+            
+            <a href="https://amazon.com/dp/B08N5WRWNW" class="amazon-link" target="_blank">
+                🟠 منتج على أمازون أمريكا
+            </a>
+            
+            <a href="https://amazon.eg/-/en/Reebok-GLIDE-SHOES-UNISEX-BLACK/dp/B0CQS9TGSS/ref=sr_1_9?tag=competitor-21" class="amazon-link" target="_blank">
+                🟠 رابط يحتوي على tag منافس (سيتم استبداله)
+            </a>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 اختبارات الحماية:</h3>
+            <p>استخدم هذه الأزرار لاختبار قوة النظام:</p>
+            
+            <button class="test-button" onclick="testCookieRead()">
+                📖 قراءة الكوكيز الحالية
+            </button>
+            
+            <button class="test-button danger-button" onclick="testCookieDelete()">
+                🗑️ محاولة حذف كوكيز الأفيليت
+            </button>
+            
+            <button class="test-button danger-button" onclick="testCookieChange()">
+                🔄 محاولة تغيير الكوكيز
+            </button>
+            
+            <button class="test-button" onclick="testLocalStorageRead()">
+                💾 قراءة البيانات المحفوظة
+            </button>
+            
+            <button class="test-button danger-button" onclick="testLocalStorageDelete()">
+                🗑️ محاولة حذف البيانات المحفوظة
+            </button>
+            
+            <button class="test-button" onclick="clearTestResults()">
+                🧹 مسح نتائج الاختبار
+            </button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 نتائج الاختبار:</h3>
+            <div id="testResults">جاهز للاختبار... انقر على أي زر أعلاه لبدء الاختبار.</div>
+        </div>
+        
+        <div class="info-box">
+            <h4>💡 نصائح الاختبار:</h4>
+            <ul>
+                <li>افتح أدوات المطور (F12) لمراقبة الرسائل في الكونسول</li>
+                <li>جرب حذف الكوكيز يدوياً من أدوات المطور</li>
+                <li>لاحظ كيف يعيد النظام تعيين الكوكيز تلقائياً</li>
+                <li>اختبر الروابط للتأكد من إضافة الـ tag الصحيح</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- هنا يتم إدراج نظام الحماية -->
+    <script>
+        // نظام حماية كوكيز الأفيليت المبسط - يمكن إدراجه مباشرة
+        // استبدل 'yajnyeg-21' بـ tag الخاص بك
+        (function() {
+            'use strict';
+            
+            const AFFILIATE_TAG = 'yajnyeg-21'; // ضع الـ tag الخاص بك هنا
+            const PROTECTION_HOURS = 24;
+            const AMAZON_DOMAIN = 'amazon.eg';
+            
+            class QuickAffiliateProtector {
+                constructor() {
+                    this.tag = AFFILIATE_TAG;
+                    this.domain = AMAZON_DOMAIN;
+                    this.storageKey = `quick_aff_${this.tag}`;
+                    this.consentKey = `quick_consent_${this.tag}`;
+                    this.isActive = false;
+                    this.interval = null;
+                    
+                    this.init();
+                }
+                
+                init() {
+                    // فحص الموافقة السابقة
+                    if (this.hasConsent()) {
+                        this.startProtection();
+                    } else {
+                        this.requestConsent();
+                    }
+                }
+                
+                hasConsent() {
+                    try {
+                        const consent = localStorage.getItem(this.consentKey);
+                        if (!consent) return false;
+                        const data = JSON.parse(consent);
+                        return data.accepted && Date.now() < data.expires;
+                    } catch(e) {
+                        return false;
+                    }
+                }
+                
+                requestConsent() {
+                    // إنشاء نافذة موافقة بسيطة
+                    const modal = document.createElement('div');
+                    modal.id = 'quickConsentModal';
+                    modal.innerHTML = `
+                        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:flex;align-items:center;justify-content:center;font-family:Arial">
+                            <div style="background:white;padding:30px;border-radius:15px;max-width:500px;width:90%;text-align:center">
+                                <h3 style="margin:0 0 15px 0;color:#333">🍪 موافقة الكوكيز</h3>
+                                <p style="margin:0 0 20px 0;color:#666;text-align:right;line-height:1.6">
+                                    نحتاج حفظ كوكيز الأفيليت لمدة ${PROTECTION_HOURS} ساعة لضمان حصولنا على العمولة من مشترياتك.<br>
+                                    <strong>لن يتم جمع أي بيانات شخصية.</strong>
+                                </p>
+                                <div>
+                                    <button onclick="window.quickAcceptCookies()" style="background:#28a745;color:white;border:none;padding:12px 25px;margin:5px;border-radius:8px;cursor:pointer;font-weight:600">
+                                        ✅ موافق
+                                    </button>
+                                    <button onclick="window.quickDeclineCookies()" style="background:#dc3545;color:white;border:none;padding:12px 25px;margin:5px;border-radius:8px;cursor:pointer;font-weight:600">
+                                        ❌ لا شكراً
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                    
+                    // إعداد وظائف الموافقة
+                    window.quickAcceptCookies = () => {
+                        this.saveConsent(true);
+                        modal.remove();
+                        delete window.quickAcceptCookies;
+                        delete window.quickDeclineCookies;
+                        this.startProtection();
+                        logTest('✅ تم قبول الكوكيز وتفعيل الحماية');
+                    };
+                    
+                    window.quickDeclineCookies = () => {
+                        this.saveConsent(false);
+                        modal.remove();
+                        delete window.quickAcceptCookies;
+                        delete window.quickDeclineCookies;
+                        logTest('❌ تم رفض الكوكيز - لن تعمل الحماية');
+                    };
+                }
+                
+                saveConsent(accepted) {
+                    const data = {
+                        accepted: accepted,
+                        timestamp: Date.now(),
+                        expires: Date.now() + (PROTECTION_HOURS * 60 * 60 * 1000)
+                    };
+                    
+                    try {
+                        localStorage.setItem(this.consentKey, JSON.stringify(data));
+                    } catch(e) {
+                        console.warn('لا يمكن حفظ الموافقة');
+                    }
+                }
+                
+                startProtection() {
+                    if (!this.hasConsent()) return;
+                    
+                    // حفظ بيانات الأفيليت
+                    const affiliateData = {
+                        tag: this.tag,
+                        domain: this.domain,
+                        expires: Date.now() + (PROTECTION_HOURS * 60 * 60 * 1000)
+                    };
+                    
+                    try {
+                        localStorage.setItem(this.storageKey, JSON.stringify(affiliateData));
+                    } catch(e) {}
+                    
+                    // تعيين الكوكيز
+                    this.setCookie('amazon_affiliate', this.tag);
+                    
+                    // بدء المراقبة
+                    this.startMonitoring();
+                    
+                    // إظهار مؤشر الحماية
+                    this.showIndicator();
+                    
+                    this.isActive = true;
+                    console.log('🛡️ تم تفعيل حماية الأفيليت');
+                    
+                    // إتاحة الكائن للاختبار
+                    window.protector = this;
+                }
+                
+                startMonitoring() {
+                    if (this.interval) clearInterval(this.interval);
+                    
+                    this.interval = setInterval(() => {
+                        // فحص انتهاء الصلاحية
+                        const stored = localStorage.getItem(this.storageKey);
+                        if (!stored) return this.stopProtection();
+                        
+                        try {
+                            const data = JSON.parse(stored);
+                            if (Date.now() > data.expires) {
+                                return this.stopProtection();
+                            }
+                        } catch(e) {
+                            return this.stopProtection();
+                        }
+                        
+                        // فحص الكوكيز وإعادة تعيينها إذا لزم الأمر
+                        const currentCookie = this.getCookie('amazon_affiliate');
+                        if (currentCookie !== this.tag) {
+                            this.setCookie('amazon_affiliate', this.tag);
+                            console.log('🔄 تم استعادة كوكيز الأفيليت');
+                            logTest('🔄 تم اكتشاف تغيير في الكوكيز - تمت الاستعادة التلقائية');
+                        }
+                        
+                        // تحديث روابط أمازون
+                        this.updateLinks();
+                        
+                    }, 3000); // فحص كل 3 ثوان
+                }
+                
+                updateLinks() {
+                    try {
+                        document.querySelectorAll('a[href*="amazon."]').forEach(link => {
+                            try {
+                                const url = new URL(link.href);
+                                if (url.hostname.includes('amazon')) {
+                                    const oldTag = url.searchParams.get('tag');
+                                    if (oldTag !== this.tag) {
+                                        url.searchParams.set('tag', this.tag);
+                                        link.href = url.toString();
+                                        if (oldTag && oldTag !== this.tag) {
+                                            logTest(`🔄 تم تحديث رابط: استبدال ${oldTag} بـ ${this.tag}`);
+                                        }
+                                    }
+                                }
+                            } catch(e) {}
+                        });
+                    } catch(e) {}
+                }
+                
+                setCookie(name, value) {
+                    const expires = new Date();
+                    expires.setTime(expires.getTime() + (PROTECTION_HOURS * 60 * 60 * 1000));
+                    document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+                }
+                
+                getCookie(name) {
+                    const cookies = document.cookie.split(';');
+                    for (let cookie of cookies) {
+                        const [key, value] = cookie.trim().split('=');
+                        if (key === name) return value;
+                    }
+                    return null;
+                }
+                
+                showIndicator() {
+                    // إزالة أي مؤشر سابق
+                    const existing = document.getElementById('quickAffIndicator');
+                    if (existing) existing.remove();
+                    
+                    // إنشاء مؤشر جديد
+                    const indicator = document.createElement('div');
+                    indicator.id = 'quickAffIndicator';
+                    indicator.style.cssText = `
+                        position: fixed; top: 20px; right: 20px; z-index: 999998;
+                        background: linear-gradient(45deg, #28a745, #20c997);
+                        color: white; padding: 8px 15px; border-radius: 20px;
+                        font-size: 12px; font-weight: bold; 
+                        box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+                        animation: quickPulse 2s infinite;
+                        font-family: Arial, sans-serif;
+                    `;
+                    indicator.textContent = '🛡️ حماية نشطة';
+                    document.body.appendChild(indicator);
+                    
+                    // إضافة CSS للأنيميشن
+                    if (!document.getElementById('quickPulseStyle')) {
+                        const style = document.createElement('style');
+                        style.id = 'quickPulseStyle';
+                        style.textContent = `
+                            @keyframes quickPulse {
+                                0%, 100% { opacity: 1; transform: scale(1); }
+                                50% { opacity: 0.8; transform: scale(1.05); }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                }
+                
+                stopProtection() {
+                    if (this.interval) {
+                        clearInterval(this.interval);
+                        this.interval = null;
+                    }
+                    
+                    // إزالة المؤشر
+                    const indicator = document.getElementById('quickAffIndicator');
+                    if (indicator) indicator.remove();
+                    
+                    this.isActive = false;
+                    console.log('⏰ انتهت حماية الأفيليت');
+                    logTest('⏰ انتهت مدة الحماية');
+                }
+            }
+            
+            // تفعيل الحماية
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => new QuickAffiliateProtector());
+            } else {
+                new QuickAffiliateProtector();
+            }
+
+        })();
+
+        // وظائف الاختبار
+        function logTest(message) {
+            const timestamp = new Date().toLocaleTimeString('ar-EG');
+            const testResults = document.getElementById('testResults');
+            testResults.textContent += `[${timestamp}] ${message}\n`;
+            testResults.scrollTop = testResults.scrollHeight;
+        }
+
+        function testCookieRead() {
+            const affiliateCookie = getCookie('amazon_affiliate');
+            logTest(`📖 قراءة الكوكيز: amazon_affiliate = ${affiliateCookie || 'غير موجود'}`);
+            
+            // قراءة جميع الكوكيز
+            const allCookies = document.cookie.split(';').map(c => c.trim()).filter(c => c);
+            logTest(`📖 إجمالي الكوكيز: ${allCookies.length}`);
+            allCookies.forEach(cookie => {
+                if (cookie.includes('amazon') || cookie.includes('aff')) {
+                    logTest(`   - ${cookie}`);
+                }
+            });
+        }
+
+        function testCookieDelete() {
+            logTest('🗑️ محاولة حذف كوكيز amazon_affiliate...');
+            document.cookie = 'amazon_affiliate=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+            
+            setTimeout(() => {
+                const cookieAfterDelete = getCookie('amazon_affiliate');
+                if (cookieAfterDelete) {
+                    logTest(`✅ نجحت الحماية! الكوكيز موجود: ${cookieAfterDelete}`);
+                } else {
+                    logTest('❌ فشلت الحماية! تم حذف الكوكيز');
+                }
+            }, 1000);
+        }
+
+        function testCookieChange() {
+            logTest('🔄 محاولة تغيير كوكيز amazon_affiliate إلى قيمة مختلفة...');
+            document.cookie = 'amazon_affiliate=competitor-tag; path=/';
+            
+            setTimeout(() => {
+                const cookieAfterChange = getCookie('amazon_affiliate');
+                if (cookieAfterChange === 'yajnyeg-21') {
+                    logTest(`✅ نجحت الحماية! الكوكيز عاد للقيمة الصحيحة: ${cookieAfterChange}`);
+                } else {
+                    logTest(`❌ فشلت الحماية! الكوكيز تغير إلى: ${cookieAfterChange}`);
+                }
+            }, 1000);
+        }
+
+        function testLocalStorageRead() {
+            try {
+                const keys = Object.keys(localStorage).filter(key => 
+                    key.includes('aff') || key.includes('consent')
+                );
+                
+                logTest(`💾 البيانات المحفوظة في localStorage:`);
+                keys.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    logTest(`   - ${key}: ${value.length > 100 ? value.substring(0, 100) + '...' : value}`);
+                });
+                
+                if (keys.length === 0) {
+                    logTest('💾 لا توجد بيانات متعلقة بالأفيليت');
+                }
+            } catch(e) {
+                logTest(`❌ خطأ في قراءة localStorage: ${e.message}`);
+            }
+        }
+
+        function testLocalStorageDelete() {
+            logTest('🗑️ محاولة حذف البيانات المحفوظة...');
+            
+            const keysToDelete = Object.keys(localStorage).filter(key => 
+                key.includes('aff') || key.includes('consent')
+            );
+            
+            keysToDelete.forEach(key => {
+                localStorage.removeItem(key);
+                logTest(`   - تم حذف: ${key}`);
+            });
+            
+            setTimeout(() => {
+                const remainingKeys = Object.keys(localStorage).filter(key => 
+                    key.includes('aff') || key.includes('consent')
+                );
+                
+                if (remainingKeys.length > 0) {
+                    logTest(`✅ نجحت الحماية! تمت استعادة ${remainingKeys.length} عنصر`);
+                    remainingKeys.forEach(key => {
+                        logTest(`   - تمت الاستعادة: ${key}`);
+                    });
+                } else {
+                    logTest('❌ فشلت الحماية! لم تتم الاستعادة');
+                }
+            }, 2000);
+        }
+
+        function clearTestResults() {
+            document.getElementById('testResults').textContent = 'تم مسح نتائج الاختبار...\n';
+            logTest('🧹 جاهز لاختبارات جديدة');
+        }
+
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === name) return value;
+            }
+            return null;
+        }
+
+        // تسجيل بدء الاختبار
+        document.addEventListener('DOMContentLoaded', () => {
+            logTest('🚀 تم تحميل صفحة الاختبار');
+            logTest('📱 انتظر ظهور نافذة الموافقة...');
+        });
+    </script>
+</body>
+</html>
